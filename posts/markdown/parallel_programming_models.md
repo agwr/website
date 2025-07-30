@@ -8,9 +8,9 @@ Yesterday, I spoke at the [Programming Languages Club at Georgia Tech](https://d
 
 In the early days of computing, improving performance was straightforward: make the processor faster. During the 1990s, chip manufacturers simply shrank transistors with each generation, as described by Moore's Law (transistor density doubling roughly every two years). Smaller transistors meant more of them could fit in the same area and signals had shorter distances to travel, yielding higher clock speeds and lower power per operation. For a while, clock speeds and transistor counts increased hand-in-hand, making programs run faster without any changes to software.
 
-However, this approach hit physical limits. As transistors got denser, chips ran into problems with heat dissipation and manufacturing complexity (e.g. the challenges of 3nm and smaller process nodes). Chip designers reached a point of diminishing returns: simply adding more transistors or upping the clock rate began to yield less improvement, while generating more heat and cost. You can't indefinitely get more juice by squeezing the same lemon.
+However, this approach hit physical limits. As transistors got denser, chips ran into problems with heat dissipation and manufacturing complexity (e.g. the challenges of 3nm and smaller process nodes). Chip designers reached a point of diminishing returns: simply adding more transistors or upping the clock rate began to yield less improvement, while generating more heat and cost. You can only squeeze so much juice from the same lemon before it runs dry.
 
-The industry's response in the mid-2000s was to scale out horizontally by adding multiple processing cores on a single chip. Instead of one super-fast core, you get several moderately fast cores working in parallel. For example, an Apple M1 Pro has 8 cores, and high-end server processors (like Intel Xeon) have up to 144 cores. Each core can run tasks in parallel independently, so an application can *potentially* run N times faster with N cores (if the work can be evenly divided).
+The industry's response in the mid-2000s was to scale out horizontally by adding multiple processing cores on a single chip. Instead of one super-fast core, you get several moderately fast cores working in parallel. For example, an Apple M1 Pro has 8 cores, and high-end server processors (like Intel Xeon) have up to 144 cores. Each core can run tasks in parallel independently, so an application can theoretically run N times faster with N cores. Unfortunately, this is often not the case due to various factors (context switches, communication overhead, etc.).
 
 ### Different Forms of Parallelism
 
@@ -129,7 +129,7 @@ std::thread t1([&] { for (std::size_t i = 0; i < 1'000'000; ++i) { ++foo.x; } })
 std::thread t2([&] { for (std::size_t i = 0; i < 1'000'000; ++i) { ++foo.y; } });
 ```
 
-Most hardware uses 64-byte cache lines, and C++17 provides the compile-time constant `std::hardware_destructive_interference_size` to query the cache line size on an architecture. With this change, `x` and `y` will be aligned on different cache lines, so each thread mostly stays in its own cache without constantly invalidating the other. A simple microbenchmark on my machine shows the difference: without padding, the two-thread test took ~34×10^6 ns; with padding, ~7.1×10^6 ns. That's about a 4.8× speedup gained solely by eliminating false sharing.
+Most hardware uses 64-byte cache lines, and C++17 provides the compile-time constant `std::hardware_destructive_interference_size` to query the cache line size on an architecture. With this change, `x` and `y` will be aligned on different cache lines, so each thread mostly stays in its own cache without constantly invalidating the other. A simple microbenchmark on my machine shows the difference: without padding, the two-thread test took ~34x10^6 ns; with padding, ~7.1x10^6 ns. That's about a 5x speedup gained solely by eliminating false sharing.
 
 ## Parallelism on GPU
 
@@ -144,7 +144,7 @@ Another key difference is memory: the CPU (host) and GPU (device) have separate 
 
 ### Triton Kernels
 
-Writing CUDA C++ directly can be verbose and non-portable. Triton is a newer approach: it's a domain-specific language embedded in Python that aims to simplify GPU programming while remaining close to hardware. Triton provides a JIT compiler that lowers your Pythonic kernel code through multiple stages (Triton -> Triton IR -> MLIR -> PTX or other backend). Under the hood it generates code similar to what you'd write in CUDA, but you get to work in Python with auto-parallelization over a grid of threads.
+Writing CUDA C++ directly can be verbose and non-portable. Triton is a newer approach: it's a domain-specific language embedded in Python that aims to simplify GPU programming while remaining close to hardware. Triton provides a JIT compiler that lowers your Pythonic kernel code through multiple stages (Triton > Triton IR > MLIR > PTX or other backend). Under the hood it generates code similar to what you'd write in CUDA, but you get to work in Python with auto-parallelization over a grid of threads.
 
 Below is a simple Triton kernel that multiplies every element of an array by 2 (mirroring our earlier CPU example). We define the kernel with a special `@triton.jit` decorator and launch it on the GPU:
 ```py
@@ -167,7 +167,7 @@ mul_kernel[grid](data, data.numel(), BLOCK_SIZE=1024)
 
 Here Triton handles the boilerplate of launching a grid of thread blocks. We specify a block size of 1024 threads. The `pid = tl.program_id(axis=0)` gives the block index, and then we compute a vector of 1024 offsets for that block. The `tl.arange(0, BLOCK_SIZE)` construct is like getting a SIMD lane ID for each thread in the block, and `tl.load`/`tl.store` operate on all those lanes in parallel with proper masking for out-of-bounds. Essentially, each Triton block processes 1024 elements at a time, and Triton figures out how many blocks to launch to cover all 160,000 elements.
 
-Triton's goal is to be portable across GPU vendors (and potentially other accelerators), not just NVIDIA. This is why it leans on MLIR to eventually target various backends. The downside is that achieving peak performance on every new hardware requires a lot of compiler intelligence. It's difficult to encode all the low-level architectural quirks in a portable compiler, so hand-tuned vendor-specific libraries can still have an edge. In practice, Triton often gets close-to-native performance but not absolute maximum. For example, optimized Triton kernels have achieved around 75% of the throughput of equivalent cuDNN (NVIDIA's highly optimized library) kernels. In one benchmark on transformer-layer operations, Triton implementations were typically within 1.2-1.5× of CUDA's performance (some nearly equal). This is a great trade-off for many cases: you write far less low-level code and still get most of the performance.
+Triton's goal is to be portable across GPU vendors (and potentially other accelerators), not just NVIDIA. This is why it leans on MLIR to eventually target various backends. The downside is that achieving peak performance on every new hardware requires a lot of compiler intelligence. It's difficult to encode all the low-level architectural quirks in a portable compiler, so hand-tuned vendor-specific libraries can still have an edge. In practice, Triton often gets close-to-native performance but not absolute maximum. For example, optimized Triton kernels have achieved around 75% of the throughput of equivalent cuDNN (NVIDIA's highly optimized library) kernels. In one benchmark on transformer-layer operations, Triton implementations were typically within 1.2-1.5x of CUDA's performance (some nearly equal). This is a great trade-off for many cases: you write far less low-level code and still get most of the performance.
 
 ## First-class Parallelism
 
@@ -195,9 +195,9 @@ fn mul_mojo(mut data: List[Int32]):
         item[] *= 2
 ```
 
-In Mojo, `fn` declares a function, and the loop over `data` is auto-vectorized – `item[]` performs an explicit dereference. Unlike Python, this yields a deterministic ~15× speedup by guaranteeing SIMD execution without relying on pseudo-indeterministic compiler heuristics or manual intrinsics.
+In Mojo, `fn` declares a function, and the loop over `data` is auto-vectorized (for context, `item[]` performs an explicit dereference). Unlike Python, this yields a deterministic ~15x speedup by guaranteeing SIMD execution without relying on pseudo-indeterministic compiler heuristics or manual intrinsics.
 
-Mojo is still a work in progress (as of 2025, the GPU programming API is highly unstable and not publicly available yet). However, it's a promising direction. The plan is that you will be able to write portable GPU kernels in Mojo, and the compiler will handle mapping them to the hardware efficiently, just like it does for CPU SIMD. Mojo is an example of treating parallelism as a foundational feature of the programming model rather than an afterthought.
+Mojo is still under active development (as of 2025, its GPU programming API is experimental and not yet publicly available). However, it's a promising direction. The plan is that you will be able to write portable GPU kernels in Mojo, and the compiler will handle mapping them to the hardware efficiently, just like it does for CPU SIMD. Mojo is an example of treating parallelism as a foundational feature of the programming model rather than an afterthought.
 
 Another emerging project in this vein is Bend/HVM, a functional heterogeneous programming language.
 

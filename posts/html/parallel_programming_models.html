@@ -304,8 +304,8 @@
           complexity (e.g. the challenges of 3nm and smaller process nodes).
           Chip designers reached a point of diminishing returns: simply adding
           more transistors or upping the clock rate began to yield less
-          improvement, while generating more heat and cost. You can't
-          indefinitely get more juice by squeezing the same lemon.
+          improvement, while generating more heat and cost. You can only squeeze
+          so much juice from the same lemon before it runs dry.
         </p>
         <p>
           The industry's response in the mid-2000s was to scale out horizontally
@@ -314,8 +314,9 @@
           parallel. For example, an Apple M1 Pro has 8 cores, and high-end
           server processors (like Intel Xeon) have up to 144 cores. Each core
           can run tasks in parallel independently, so an application can
-          <em>potentially</em> run N times faster with N cores (if the work can
-          be evenly divided).
+          theoretically run N times faster with N cores. Unfortunately, this is
+          often not the case due to various factors (context switches,
+          communication overhead, etc.).
         </p>
         <h3>Different Forms of Parallelism</h3>
         <ol>
@@ -564,9 +565,9 @@
           <code>x</code> and <code>y</code> will be aligned on different cache
           lines, so each thread mostly stays in its own cache without constantly
           invalidating the other. A simple microbenchmark on my machine shows
-          the difference: without padding, the two-thread test took ~34×10^6 ns;
-          with padding, ~7.1×10^6 ns. That's about a 4.8× speedup gained solely
-          by eliminating false sharing.
+          the difference: without padding, the two-thread test took ~34x10^6 ns;
+          with padding, ~7.1x10^6 ns. That's about a 5x speedup gained solely by
+          eliminating false sharing.
         </p>
         <h2>Parallelism on GPU</h2>
         <p>
@@ -625,8 +626,8 @@
           newer approach: it's a domain-specific language embedded in Python
           that aims to simplify GPU programming while remaining close to
           hardware. Triton provides a JIT compiler that lowers your Pythonic
-          kernel code through multiple stages (Triton -&gt; Triton IR -&gt; MLIR
-          -&gt; PTX or other backend). Under the hood it generates code similar
+          kernel code through multiple stages (Triton &gt; Triton IR &gt; MLIR
+          &gt; PTX or other backend). Under the hood it generates code similar
           to what you'd write in CUDA, but you get to work in Python with
           auto-parallelization over a grid of threads.
         </p>
@@ -681,7 +682,7 @@
           kernels have achieved around 75% of the throughput of equivalent cuDNN
           (NVIDIA's highly optimized library) kernels. In one benchmark on
           transformer-layer operations, Triton implementations were typically
-          within 1.2-1.5× of CUDA's performance (some nearly equal). This is a
+          within 1.2-1.5x of CUDA's performance (some nearly equal). This is a
           great trade-off for many cases: you write far less low-level code and
           still get most of the performance.
         </p>
@@ -752,19 +753,20 @@
 
         <p>
           In Mojo, <code>fn</code> declares a function, and the loop over
-          <code>data</code> is auto-vectorized – <code>item[]</code> performs an
-          explicit dereference. Unlike Python, this yields a deterministic ~15×
-          speedup by guaranteeing SIMD execution without relying on
-          pseudo-indeterministic compiler heuristics or manual intrinsics.
+          <code>data</code> is auto-vectorized (for context,
+          <code>item[]</code> performs an explicit dereference). Unlike Python,
+          this yields a deterministic ~15x speedup by guaranteeing SIMD
+          execution without relying on pseudo-indeterministic compiler
+          heuristics or manual intrinsics.
         </p>
         <p>
-          Mojo is still a work in progress (as of 2025, the GPU programming API
-          is highly unstable and not publicly available yet). However, it's a
-          promising direction. The plan is that you will be able to write
-          portable GPU kernels in Mojo, and the compiler will handle mapping
-          them to the hardware efficiently, just like it does for CPU SIMD. Mojo
-          is an example of treating parallelism as a foundational feature of the
-          programming model rather than an afterthought.
+          Mojo is still under active development (as of 2025, its GPU
+          programming API is experimental and not yet publicly available).
+          However, it's a promising direction. The plan is that you will be able
+          to write portable GPU kernels in Mojo, and the compiler will handle
+          mapping them to the hardware efficiently, just like it does for CPU
+          SIMD. Mojo is an example of treating parallelism as a foundational
+          feature of the programming model rather than an afterthought.
         </p>
         <p>
           Another emerging project in this vein is Bend/HVM, a functional
