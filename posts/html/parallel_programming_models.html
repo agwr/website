@@ -279,8 +279,8 @@
           <a href="https://dtyped.netlify.app"
             >Programming Languages Club at Georgia Tech</a
           >
-          about exposing models for parallelism in programming languages. You
-          can find the slides
+          about exposing models for parallelism in programming languages in the
+          context of modern deep learning systems. You can find the slides
           <a
             href="https://drive.google.com/file/d/1Gs3_vpIsAcCgR79eh9m6_rQjnRKktsJQ/view?usp=share_link"
             >here</a
@@ -318,7 +318,7 @@
           often not the case due to various factors (context switches,
           communication overhead, etc.).
         </p>
-        <h3>Different Forms of Parallelism</h3>
+        <h3>General Forms of Parallelism</h3>
         <ol>
           <li>
             Data Parallelism: performing the same operation on different pieces
@@ -326,22 +326,23 @@
             parallel).
           </li>
           <li>
-            Task Parallelism: running independent tasks or functions in
-            parallel, which may be doing different things (e.g. a web server
-            handling multiple requests on different threads).
+            Model Parallelism: splitting a single model across multiple devices
+            so different parts of the model execute concurrently (e.g.,
+            allocating model experts to different devices).
           </li>
           <li>
-            Device Parallelism: spreading work across multiple physical devices
-            (like using multiple servers, or offloading some tasks to a GPU or
-            TPU). This can be seen as a coarse-grained form of task parallelism
-            across machines or specialized processors.
+            Pipeline Parallelism: breaking a computation into stages and
+            executing those stages in a pipeline across multiple devices. While
+            one stage is processing batch n, the next stage can process batch n
+            - 1, and so on (e.g., training networks where layers are partitioned
+            and pipelined across devices).
           </li>
         </ol>
         <p>
-          Modern high-performance computing often combines these forms. In this
-          post, we'll mostly concentrate on data parallelism – making an
-          algorithm execute faster by applying it in parallel on many data
-          elements.
+          Modern high performance computing and deep learning often combines
+          these forms. In this post, we'll mostly concentrate on data
+          parallelism – making an algorithm execute faster by applying it in
+          parallel on many data elements.
         </p>
         <h2>SIMD</h2>
         <p>
@@ -762,15 +763,14 @@
         <p>
           Mojo is still under active development (as of 2025, its GPU
           programming API is experimental and not yet publicly available).
-          However, it's a promising direction. The plan is that you will be able
-          to write portable GPU kernels in Mojo, and the compiler will handle
-          mapping them to the hardware efficiently, just like it does for CPU
-          SIMD. Mojo is an example of treating parallelism as a foundational
-          feature of the programming model rather than an afterthought.
+          However, it's a promising direction. The goal is that programmers will
+          be able to write portable kernels in Mojo, and the compiler will
+          handle parallelizing and mapping to the hardware efficiently, just
+          like it already does for CPU SIMD.
         </p>
         <p>
-          Another emerging project in this vein is Bend/HVM, a functional
-          heterogeneous programming language.
+          Other emerging project in this vein are Bend/HVM and, to some extent,
+          JAX.
         </p>
         <h2>Resources</h2>
         <p>

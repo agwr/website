@@ -2,7 +2,7 @@
 
 > April 5, 2025
 
-Yesterday, I spoke at the [Programming Languages Club at Georgia Tech](https://dtyped.netlify.app) about exposing models for parallelism in programming languages. You can find the slides [here](https://drive.google.com/file/d/1Gs3_vpIsAcCgR79eh9m6_rQjnRKktsJQ/view?usp=share_link). This post is a synopsis of the content I went over in my talk.
+Yesterday, I spoke at the [Programming Languages Club at Georgia Tech](https://dtyped.netlify.app) about exposing models for parallelism in programming languages in the context of modern deep learning systems. You can find the slides [here](https://drive.google.com/file/d/1Gs3_vpIsAcCgR79eh9m6_rQjnRKktsJQ/view?usp=share_link). This post is a synopsis of the content I went over in my talk.
 
 ## Motivation for Parallelism
 
@@ -12,22 +12,22 @@ However, this approach hit physical limits. As transistors got denser, chips ran
 
 The industry's response in the mid-2000s was to scale out horizontally by adding multiple processing cores on a single chip. Instead of one super-fast core, you get several moderately fast cores working in parallel. For example, an Apple M1 Pro has 8 cores, and high-end server processors (like Intel Xeon) have up to 144 cores. Each core can run tasks in parallel independently, so an application can theoretically run N times faster with N cores. Unfortunately, this is often not the case due to various factors (context switches, communication overhead, etc.).
 
-### Different Forms of Parallelism
+### General Forms of Parallelism
 
 1. Data Parallelism: performing the same operation on different pieces of data simultaneously (e.g. adding two arrays element-wise in parallel).
-2. Task Parallelism: running independent tasks or functions in parallel, which may be doing different things (e.g. a web server handling multiple requests on different threads).
-3. Device Parallelism: spreading work across multiple physical devices (like using multiple servers, or offloading some tasks to a GPU or TPU). This can be seen as a coarse-grained form of task parallelism across machines or specialized processors.
+2. Model Parallelism: splitting a single model across multiple devices so different parts of the model execute concurrently (e.g., allocating model experts to different devices).
+3. Pipeline Parallelism: breaking a computation into stages and executing those stages in a pipeline across multiple devices. While one stage is processing batch n, the next stage can process batch n - 1, and so on (e.g., training networks where layers are partitioned and pipelined across devices).
 
-Modern high-performance computing often combines these forms. In this post, we'll mostly concentrate on data parallelism – making an algorithm execute faster by applying it in parallel on many data elements.
-
+Modern high performance computing and deep learning often combines these forms. In this post, we'll mostly concentrate on data parallelism – making an algorithm execute faster by applying it in parallel on many data elements.
 
 ## SIMD
 
 Adding more cores isn't the only way to speed up computation; we can also make each core itself do more work in parallel. Modern CPUs already exploit a lot of internal parallelism with techniques like instruction pipelining, out-of-order execution, and speculative execution. Pipelining, for instance, splits the execution of an instruction into stages (fetch, decode, execute, etc.) so that multiple instructions are in progress concurrently (like an assembly line).
 
-SIMD is a form of internal data parallelism at the instruction level. The CPU has special vector registers that are, say, 128, 256, or 512 bits wide, which can be viewed as containing multiple lanes (chunks) of smaller data elements. A single SIMD instruction operates on all lanes in one go. For example, with 128-bit NEON registers on an ARM processor, each register can hold four 32-bit integers (4 * 32 = 128 bits). One SIMD add instruction can then add four pairs of integers at once (as opposed to four separate scalar add instructions).
+SIMD is a form of internal data parallelism at the instruction level. The CPU has special vector registers that are, say, 128, 256, or 512 bits wide, which can be viewed as containing multiple lanes (chunks) of smaller data elements. A single SIMD instruction operates on all lanes in one go. For example, with 128-bit NEON registers on an ARM processor, each register can hold four 32-bit integers (4 \* 32 = 128 bits). One SIMD add instruction can then add four pairs of integers at once (as opposed to four separate scalar add instructions).
 
 Under the hood, using SIMD means utilizing these wide registers and the corresponding instruction set extensions (SSE, AVX on x86, NEON on ARM, etc.). High-level languages usually expose SIMD through intrinsics – special macros that map directly to SIMD instructions. For instance, here's a simple example using ARM NEON intrinsics to add two vectors of integers:
+
 ```cpp
 #include <arm_neon.h>
 
@@ -42,6 +42,7 @@ int32x4_t result = vaddq_s32(a, b);
 Here, `vaddq_s32` is a SIMD addition that processes four 32-bit integers per register in one instruction. The `_q` in the name indicates a 128-bit quadword operation (four lanes in this case).
 
 Real-world data rarely fits perfectly into one SIMD register, so programmers use vector chunking (or strip-mining) to handle arbitrarily large arrays with SIMD. The idea is to break the data into chunks the size of the vector registers, process those chunks in a vectorized loop, and then handle any leftover elements with a scalar loop. For example:
+
 ```cpp
 int a[1030], b[1030], result[1030];
 
@@ -69,6 +70,7 @@ However, compilers are not omniscient. Auto-vectorization might fail if the code
 To leverage multiple CPU cores, we use threads. A thread is the smallest unit of execution that can run concurrently with other threads while sharing the same memory space. Most languages offer an API for spawning threads (OS-managed threads) and some have higher-level abstractions (like thread pools or "green" user-space threads). The operating system's scheduler distributes time slices on CPU cores for each thread in a process. In a multi-core system, threads can potentially run in parallel (on different cores) – not just interleaved by time slicing.
 
 Creating a new OS thread is relatively expensive (it generally involves a system call and allocations), so you don't want to spawn threads frivolously. For example, suppose we want to multiply every element in a large array by 2 using an 8-core CPU. One naive approach would be to create a new thread for each element in the array:
+
 ```cpp
 std::array<int, 160000> data = {0, 1, 2, /*...*/};
 
@@ -81,6 +83,7 @@ for (std::size_t i = 0; i < data.size(); ++i) {
 This is a terrible idea – it would launch 160,000 threads! The overhead of creating and scheduling that many threads would overwhelm any gain from parallelism. In fact, it would likely run slower than just doing the loop in one thread, due to context switch overhead and contention. Modern CPUs also feature Hyper-Threading (Intel) or similar simultaneous multithreading, where each core can run two hardware threads, but those still share the core's execution units. Hyper-threading can improve throughput for workloads that often wait on memory, but it doesn't double performance and can hurt latency-sensitive tasks. In general, you want at most one thread per physical core for heavy compute work.
 
 A smarter strategy for the example above is to use a fixed number of threads equal to the core count, and divide the array into chunks. For 160,000 elements on 8 cores, each thread can handle 20,000 elements:
+
 ```cpp
 std::array<int, 160000> data = {0, 1, 2, /*...*/};
 std::size_t core_count = 8;
@@ -104,6 +107,7 @@ This way, only 8 threads are created, each doing a hefty chunk of work. There is
 One pitfall when parallelizing on CPUs is false sharing, which stems from how caches work. Each core in a modern system has its own caches, and memory is cached in blocks of e.g. 64 bytes called cache lines. When one core writes to a memory address, any other core that has that address cached must be alerted (cache coherence protocols will invalidate or update the line in other cores' caches). False sharing occurs when two threads on different cores are modifying independent variables that happen to reside on the same cache line. Each update ping-pongs the cache line between cores, causing stalls, even though the threads aren't actually sharing data in a logical sense.
 
 Consider this contrived example:
+
 ```cpp
 struct {
   std::atomic<int> x{0};
@@ -117,6 +121,7 @@ std::thread t2([&] { for (std::size_t i = 0; i < 1'000'000; ++i) { ++foo.y; } })
 Here two threads are incrementing different members of the same struct `foo`. Here, `x` and `y` will be on the same cache line. This will trigger continuous cache invalidation traffic between the two cores as they each modify their part of `foo` – thrashing the cache line back and forth.
 
 To address false sharing, we can pad or separate data so that concurrently modified variables reside on different cache lines. For example, we can insert padding bytes between `x` and `y`:
+
 ```cpp
 constexpr std::size_t cacheline_size = std::hardware_destructive_interference_size;
 
@@ -147,6 +152,7 @@ Another key difference is memory: the CPU (host) and GPU (device) have separate 
 Writing CUDA C++ directly can be verbose and non-portable. Triton is a newer approach: it's a domain-specific language embedded in Python that aims to simplify GPU programming while remaining close to hardware. Triton provides a JIT compiler that lowers your Pythonic kernel code through multiple stages (Triton > Triton IR > MLIR > PTX or other backend). Under the hood it generates code similar to what you'd write in CUDA, but you get to work in Python with auto-parallelization over a grid of threads.
 
 Below is a simple Triton kernel that multiplies every element of an array by 2 (mirroring our earlier CPU example). We define the kernel with a special `@triton.jit` decorator and launch it on the GPU:
+
 ```py
 @triton.jit
 def mul_kernel(data_ptr, n: tl.constexpr, BLOCK_SIZE: tl.constexpr):
@@ -182,6 +188,7 @@ Mojo is a new language (in development) that attempts to do exactly that. Create
 3. In general, many parallel and asynchronous constructs are part of the core language syntax, not ad-hoc add-ons.
 
 To illustrate Mojo's approach, consider again the task of doubling each element in an array. In plain Python, you'd write a simple loop:
+
 ```py
 def mul_py(data: list[int]):
     for i in range(len(data)):
@@ -189,6 +196,7 @@ def mul_py(data: list[int]):
 ```
 
 If you run this in CPython, it's scalar and single-threaded (the interpreter will not use SIMD or multiple cores). Mojo, by contrast, can JIT compile a similar looking loop but auto-vectorize it and use compiler optimizations transparently. The Mojo version might look like:
+
 ```py
 fn mul_mojo(mut data: List[Int32]):
     for item in data:
@@ -197,9 +205,9 @@ fn mul_mojo(mut data: List[Int32]):
 
 In Mojo, `fn` declares a function, and the loop over `data` is auto-vectorized (for context, `item[]` performs an explicit dereference). Unlike Python, this yields a deterministic ~15x speedup by guaranteeing SIMD execution without relying on pseudo-indeterministic compiler heuristics or manual intrinsics.
 
-Mojo is still under active development (as of 2025, its GPU programming API is experimental and not yet publicly available). However, it's a promising direction. The plan is that you will be able to write portable GPU kernels in Mojo, and the compiler will handle mapping them to the hardware efficiently, just like it does for CPU SIMD. Mojo is an example of treating parallelism as a foundational feature of the programming model rather than an afterthought.
+Mojo is still under active development (as of 2025, its GPU programming API is experimental and not yet publicly available). However, it's a promising direction. The goal is that programmers will be able to write portable kernels in Mojo, and the compiler will handle parallelizing and mapping to the hardware efficiently, just like it already does for CPU SIMD.
 
-Another emerging project in this vein is Bend/HVM, a functional heterogeneous programming language.
+Other emerging project in this vein are Bend/HVM and, to some extent, JAX.
 
 ## Resources
 
