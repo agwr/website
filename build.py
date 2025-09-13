@@ -17,7 +17,7 @@ def render_post(md_path: Path) -> str:
     html_body = markdown.markdown(md_content, extensions=["fenced_code", "codehilite"])
 
     # Create Pygments CSS
-    formatter = HtmlFormatter(style="lovelace")
+    formatter = HtmlFormatter(style="arduino")
     css_code_highlighting = formatter.get_style_defs(".codehilite")
     css_code_highlighting = css_code_highlighting.replace("bold", "normal")
     css_code_highlighting = css_code_highlighting.replace("italic", "normal")
@@ -34,13 +34,25 @@ def render_post(md_path: Path) -> str:
       {css_code_highlighting}
       .codehilite {{ background: transparent; }}
     </style>
-    <title>Ayush Gundawar &mdash; Post</title>
+    <title>Ayush Gundawar</title>
   </head>
   <body>
     <div class="container">
-      <div class="content">
+      <nav>
+        <ul>
+          <li><a href="../../index.html">Home</a></li>
+          <li><a href="../../writings.html">Writings</a></li>
+          <li>
+            <a href="https://scholar.google.com/citations?user=JZThC2cAAAAJ">
+              Research
+            </a>
+          </li>
+          <li><a href="https://github.com/ayushgun">Software</a></li>
+        </ul>
+      </nav>
+      <main>
         {html_body}
-      </div>
+      </main>
     </div>
   </body>
 </html>
@@ -49,8 +61,8 @@ def render_post(md_path: Path) -> str:
     return html_template
 
 
-def render_blog() -> None:
-    """Render blog.html with entries for all blog posts."""
+def render_writings() -> None:
+    """Render writings.html with entries for all writings posts."""
 
     md_files = sorted(Path("posts/markdown").rglob("*.md"))
 
@@ -71,14 +83,14 @@ def render_blog() -> None:
     # Sort posts by date descending (newest first)
     post_data.sort(key=lambda x: datetime.strptime(x[1], "%B %d, %Y"), reverse=True)
 
-    # Modify blog.html
-    blog_html_path = Path("blog.html")
-    soup = BeautifulSoup(blog_html_path.read_text(encoding="utf-8"), "html.parser")
+    # Modify writings.html
+    writings_html_path = Path("writings.html")
+    soup = BeautifulSoup(writings_html_path.read_text(encoding="utf-8"), "html.parser")
 
     # Find the div for post links
     post_links_div = soup.find(id="post-links")
     if post_links_div is None:
-        raise RuntimeError("No element with id='post-links' found in blog.html")
+        raise RuntimeError("No element with id='post-links' found in writings.html")
 
     # Clear existing content
     post_links_div.clear()  # type: ignore
@@ -95,11 +107,8 @@ def render_blog() -> None:
         date_tag.string = date_str
         post_links_div.append(date_tag)
 
-        # Add a line break for spacing
-        post_links_div.append(soup.new_tag("br"))
-
-    # Write the updated blog.html
-    blog_html_path.write_text(str(soup), encoding="utf-8")
+    # Write the updated writings.html
+    writings_html_path.write_text(str(soup), encoding="utf-8")
 
 
 def main() -> None:
@@ -116,9 +125,9 @@ def main() -> None:
         html_file_path.write_text(html_content, encoding="utf-8")
         subprocess.run(["prettier", "--write", str(html_file_path)], check=False)
 
-    # Update the blog listing
-    render_blog()
-    subprocess.run(["prettier", "--write", "blog.html"], check=False)
+    # Update the writings listing
+    render_writings()
+    subprocess.run(["prettier", "--write", "writings.html"], check=False)
 
 
 if __name__ == "__main__":
