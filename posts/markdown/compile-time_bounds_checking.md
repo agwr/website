@@ -72,7 +72,8 @@ std::cout << get(msg, 9) << std::endl;
 ```
 
 If we attempt to compile this:
-```
+
+```text
 $ g++ src/main.cpp -std=c++20 -O1
 In function 'constexpr void check_bounds(I, I) [with I = long unsigned int]',
     inlined from 'constexpr typename T::reference get(T&, std::size_t) [with T = std::__cxx11::basic_string<char>]' at src/main.cpp:29:15,
