@@ -1,5 +1,6 @@
 body {
-  font-family: monospace;
+  font-family: sans-serif;
+  font-size: 0.9rem;
   line-height: 1.5;
 }
 
@@ -10,11 +11,11 @@ body {
 }
 
 main {
-  max-width: 45em;
+  max-width: 35em;
 }
 
 nav {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   text-align: right;
 }
 
@@ -60,8 +61,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: serif;
-  font-weight: 200;
+  font-weight: 400;
 }
 
 blockquote {
