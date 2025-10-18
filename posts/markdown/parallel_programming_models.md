@@ -12,7 +12,7 @@ However, this approach hit physical limits. As transistors got denser, chips ran
 
 The industry's response in the mid-2000s was to scale out horizontally by adding multiple processing cores on a single chip. Instead of one super-fast core, you get several moderately fast cores working in parallel. For example, an Apple M1 Pro has 8 cores, and high-end server processors (like Intel Xeon) have up to 144 cores. Each core can run tasks in parallel independently, so an application can theoretically run N times faster with N cores. Unfortunately, this is often not the case due to various factors (context switches, communication overhead, etc.).
 
-### General Forms of Parallelism
+## General Forms of Parallelism
 
 1. Data Parallelism: performing the same operation on different pieces of data simultaneously (e.g. adding two arrays element-wise in parallel).
 2. Model Parallelism: splitting a single model across multiple devices so different parts of the model execute concurrently (e.g., allocating model experts to different devices).
@@ -102,7 +102,7 @@ for (std::size_t i = 0; i < core_count; ++i) {
 
 This way, only 8 threads are created, each doing a hefty chunk of work. There is negligible scheduling overhead beyond those 8 threads. A nice bonus: a good compiler will also auto-vectorize the inner loop for each thread. In this case, GCC will emit a vector instruction (`vpslld` on x86) to multiply 4 integers at a time by 2.
 
-### False Sharing
+## False Sharing
 
 One pitfall when parallelizing on CPUs is false sharing, which stems from how caches work. Each core in a modern system has its own caches, and memory is cached in blocks of e.g. 64 bytes called cache lines. When one core writes to a memory address, any other core that has that address cached must be alerted (cache coherence protocols will invalidate or update the line in other cores' caches). False sharing occurs when two threads on different cores are modifying independent variables that happen to reside on the same cache line. Each update ping-pongs the cache line between cores, causing stalls, even though the threads aren't actually sharing data in a logical sense.
 
@@ -147,7 +147,7 @@ Importantly, GPU threads follow a different execution model known as SIMT (Singl
 
 Another key difference is memory: the CPU (host) and GPU (device) have separate memory spaces. Data must be transferred over relatively slow PCIe or NVLink buses to get to/from GPU memory. Within the GPU, memory access is optimized through a hierarchy: each thread has registers, each thread block has fast shared memory (like a user-managed L1 cache scratchpad), and there is large global memory (device VRAM) accessible to all threads. Effective GPU programming involves structuring computations to maximize use of fast shared memory and coalesced access to global memory.
 
-### Triton Kernels
+## Triton Kernels
 
 Writing CUDA C++ directly can be verbose and non-portable. Triton is a newer approach: it's a domain-specific language embedded in Python that aims to simplify GPU programming while remaining close to hardware. Triton provides a JIT compiler that lowers your Pythonic kernel code through multiple stages (Triton > Triton IR > MLIR > PTX or other backend). Under the hood it generates code similar to what you'd write in CUDA, but you get to work in Python with auto-parallelization over a grid of threads.
 

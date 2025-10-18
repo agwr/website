@@ -1,6 +1,7 @@
 body {
-  font-family: monospace;
-  line-height: 1.5;
+  font-family: sans-serif;
+  font-size: 0.8rem;
+  line-height: 1.4;
 }
 
 .container {
@@ -10,11 +11,11 @@ body {
 }
 
 main {
-  max-width: 45em;
+  max-width: 40em;
 }
 
 nav {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   text-align: right;
 }
 
@@ -61,7 +62,6 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: serif;
   font-weight: 200;
 }
 
@@ -78,14 +78,8 @@ pre {
   overflow: auto;
 }
 
-:not(pre) > code {
-  padding: 4px;
-  border-radius: 4px;
-  background-color: #f5f5f5;
-}
-
 a {
-  color: #8a7b52;
+  color: #728e00;
   text-decoration: underline;
-  text-underline-offset: 0.2em;
+  text-underline-offset: 0.25em;
 }
