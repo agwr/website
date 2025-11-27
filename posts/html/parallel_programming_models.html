@@ -226,7 +226,7 @@
       <nav>
         <ul>
           <li><a href="../../index.html">Home</a></li>
-          <li><a href="../../writings.html">Writings</a></li>
+          <li><a href="../../writing.html">Writing</a></li>
           <li>
             <a href="https://scholar.google.com/citations?user=JZThC2cAAAAJ">
               Research
@@ -252,7 +252,7 @@
             >here</a
           >. This post is a synopsis of the content I went over in my talk.
         </p>
-        <h2>Motivation for Parallelism</h2>
+        <h2>Motivation</h2>
         <p>
           In the early days of computing, improving performance was
           straightforward: make the processor faster. During the 1990s, chip
@@ -284,7 +284,7 @@
           often not the case due to various factors (context switches,
           communication overhead, etc.).
         </p>
-        <h2>General Forms of Parallelism</h2>
+        <h2>Formations</h2>
         <ol>
           <li>
             Data Parallelism: performing the same operation on different pieces
@@ -310,7 +310,7 @@
           parallelism – making an algorithm execute faster by applying it in
           parallel on many data elements.
         </p>
-        <h2>SIMD</h2>
+        <h2>Vector Instructions</h2>
         <p>
           Adding more cores isn't the only way to speed up computation; we can
           also make each core itself do more work in parallel. Modern CPUs
@@ -402,7 +402,7 @@
           to explicitly vectorize algorithms when the compiler can't do it
           automatically.
         </p>
-        <h2>Parallelism on CPU</h2>
+        <h2>Threading</h2>
         <p>
           To leverage multiple CPU cores, we use threads. A thread is the
           smallest unit of execution that can run concurrently with other
@@ -473,7 +473,6 @@
           for each thread. In this case, GCC will emit a vector instruction
           (<code>vpslld</code> on x86) to multiply 4 integers at a time by 2.
         </p>
-        <h2>False Sharing</h2>
         <p>
           One pitfall when parallelizing on CPUs is false sharing, which stems
           from how caches work. Each core in a modern system has its own caches,
@@ -536,7 +535,7 @@
           with padding, ~7.1x10^6 ns. That's about a 5x speedup gained solely by
           eliminating false sharing.
         </p>
-        <h2>Parallelism on GPU</h2>
+        <h2>GPUs</h2>
         <p>
           While CPUs have a handful of cores optimized for sequential
           performance, GPUs have thousands of smaller cores designed for massive
@@ -587,7 +586,7 @@
           computations to maximize use of fast shared memory and coalesced
           access to global memory.
         </p>
-        <h2>Triton Kernels</h2>
+        <h3>Triton Kernels</h3>
         <p>
           Writing CUDA C++ directly can be verbose and non-portable. Triton is a
           newer approach: it's a domain-specific language embedded in Python
@@ -653,8 +652,7 @@
           great trade-off for many cases: you write far less low-level code and
           still get most of the performance.
         </p>
-        <h2>First-class Parallelism</h2>
-        <p>Almost.</p>
+        <h2>First Class</h2>
         <p>
           One observation about the state of parallel programming: we've been
           bolting parallelism onto fundamentally single-threaded languages.
@@ -735,8 +733,8 @@
           like it already does for CPU SIMD.
         </p>
         <p>
-          Other emerging project in this vein are Bend/HVM and, to some extent,
-          JAX.
+          Another emerging project in this vein is Bend and, to some extent,
+          Verilog as well as other HDL languages.
         </p>
         <h2>Resources</h2>
         <p>

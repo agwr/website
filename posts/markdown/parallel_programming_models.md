@@ -4,7 +4,7 @@
 
 Yesterday, I spoke at the [Programming Languages Club at Georgia Tech](https://dtyped.netlify.app) about exposing models for parallelism in programming languages in the context of modern deep learning systems. You can find the slides [here](https://drive.google.com/file/d/1Gs3_vpIsAcCgR79eh9m6_rQjnRKktsJQ/view?usp=share_link). This post is a synopsis of the content I went over in my talk.
 
-## Motivation for Parallelism
+## Motivation
 
 In the early days of computing, improving performance was straightforward: make the processor faster. During the 1990s, chip manufacturers simply shrank transistors with each generation, as described by Moore's Law (transistor density doubling roughly every two years). Smaller transistors meant more of them could fit in the same area and signals had shorter distances to travel, yielding higher clock speeds and lower power per operation. For a while, clock speeds and transistor counts increased hand-in-hand, making programs run faster without any changes to software.
 
@@ -12,7 +12,7 @@ However, this approach hit physical limits. As transistors got denser, chips ran
 
 The industry's response in the mid-2000s was to scale out horizontally by adding multiple processing cores on a single chip. Instead of one super-fast core, you get several moderately fast cores working in parallel. For example, an Apple M1 Pro has 8 cores, and high-end server processors (like Intel Xeon) have up to 144 cores. Each core can run tasks in parallel independently, so an application can theoretically run N times faster with N cores. Unfortunately, this is often not the case due to various factors (context switches, communication overhead, etc.).
 
-## General Forms of Parallelism
+## Formations
 
 1. Data Parallelism: performing the same operation on different pieces of data simultaneously (e.g. adding two arrays element-wise in parallel).
 2. Model Parallelism: splitting a single model across multiple devices so different parts of the model execute concurrently (e.g., allocating model experts to different devices).
@@ -20,7 +20,7 @@ The industry's response in the mid-2000s was to scale out horizontally by adding
 
 Modern high performance computing and deep learning often combines these forms. In this post, we'll mostly concentrate on data parallelism – making an algorithm execute faster by applying it in parallel on many data elements.
 
-## SIMD
+## Vector Instructions
 
 Adding more cores isn't the only way to speed up computation; we can also make each core itself do more work in parallel. Modern CPUs already exploit a lot of internal parallelism with techniques like instruction pipelining, out-of-order execution, and speculative execution. Pipelining, for instance, splits the execution of an instruction into stages (fetch, decode, execute, etc.) so that multiple instructions are in progress concurrently (like an assembly line).
 
@@ -65,7 +65,7 @@ You might wonder if compilers can do this for you automatically — the answer i
 
 However, compilers are not omniscient. Auto-vectorization might fail if the code is too complex or if there are potential data dependencies the compiler can't prove won't overlap. In performance-critical code, developers still often resort to using intrinsics or inline assembly to explicitly vectorize algorithms when the compiler can't do it automatically.
 
-## Parallelism on CPU
+## Threading
 
 To leverage multiple CPU cores, we use threads. A thread is the smallest unit of execution that can run concurrently with other threads while sharing the same memory space. Most languages offer an API for spawning threads (OS-managed threads) and some have higher-level abstractions (like thread pools or "green" user-space threads). The operating system's scheduler distributes time slices on CPU cores for each thread in a process. In a multi-core system, threads can potentially run in parallel (on different cores) – not just interleaved by time slicing.
 
@@ -102,8 +102,6 @@ for (std::size_t i = 0; i < core_count; ++i) {
 
 This way, only 8 threads are created, each doing a hefty chunk of work. There is negligible scheduling overhead beyond those 8 threads. A nice bonus: a good compiler will also auto-vectorize the inner loop for each thread. In this case, GCC will emit a vector instruction (`vpslld` on x86) to multiply 4 integers at a time by 2.
 
-## False Sharing
-
 One pitfall when parallelizing on CPUs is false sharing, which stems from how caches work. Each core in a modern system has its own caches, and memory is cached in blocks of e.g. 64 bytes called cache lines. When one core writes to a memory address, any other core that has that address cached must be alerted (cache coherence protocols will invalidate or update the line in other cores' caches). False sharing occurs when two threads on different cores are modifying independent variables that happen to reside on the same cache line. Each update ping-pongs the cache line between cores, causing stalls, even though the threads aren't actually sharing data in a logical sense.
 
 Consider this contrived example:
@@ -136,7 +134,7 @@ std::thread t2([&] { for (std::size_t i = 0; i < 1'000'000; ++i) { ++foo.y; } })
 
 Most hardware uses 64-byte cache lines, and C++17 provides the compile-time constant `std::hardware_destructive_interference_size` to query the cache line size on an architecture. With this change, `x` and `y` will be aligned on different cache lines, so each thread mostly stays in its own cache without constantly invalidating the other. A simple microbenchmark on my machine shows the difference: without padding, the two-thread test took ~34x10^6 ns; with padding, ~7.1x10^6 ns. That's about a 5x speedup gained solely by eliminating false sharing.
 
-## Parallelism on GPU
+## GPUs
 
 While CPUs have a handful of cores optimized for sequential performance, GPUs have thousands of smaller cores designed for massive data parallelism. A GPU is essentially a compute fabric for running the same operation on a huge number of data elements in parallel. NVIDIA's CUDA framework (and similar models like OpenCL) let programmers launch a kernel (a function to execute on the GPU) across a grid of threads. The GPU hardware groups threads into blocks and warps for scheduling:
 
@@ -147,7 +145,7 @@ Importantly, GPU threads follow a different execution model known as SIMT (Singl
 
 Another key difference is memory: the CPU (host) and GPU (device) have separate memory spaces. Data must be transferred over relatively slow PCIe or NVLink buses to get to/from GPU memory. Within the GPU, memory access is optimized through a hierarchy: each thread has registers, each thread block has fast shared memory (like a user-managed L1 cache scratchpad), and there is large global memory (device VRAM) accessible to all threads. Effective GPU programming involves structuring computations to maximize use of fast shared memory and coalesced access to global memory.
 
-## Triton Kernels
+### Triton Kernels
 
 Writing CUDA C++ directly can be verbose and non-portable. Triton is a newer approach: it's a domain-specific language embedded in Python that aims to simplify GPU programming while remaining close to hardware. Triton provides a JIT compiler that lowers your Pythonic kernel code through multiple stages (Triton > Triton IR > MLIR > PTX or other backend). Under the hood it generates code similar to what you'd write in CUDA, but you get to work in Python with auto-parallelization over a grid of threads.
 
@@ -175,9 +173,7 @@ Here Triton handles the boilerplate of launching a grid of thread blocks. We spe
 
 Triton's goal is to be portable across GPU vendors (and potentially other accelerators), not just NVIDIA. This is why it leans on MLIR to eventually target various backends. The downside is that achieving peak performance on every new hardware requires a lot of compiler intelligence. It's difficult to encode all the low-level architectural quirks in a portable compiler, so hand-tuned vendor-specific libraries can still have an edge. In practice, Triton often gets close-to-native performance but not absolute maximum. For example, optimized Triton kernels have achieved around 75% of the throughput of equivalent cuDNN (NVIDIA's highly optimized library) kernels. In one benchmark on transformer-layer operations, Triton implementations were typically within 1.2-1.5x of CUDA's performance (some nearly equal). This is a great trade-off for many cases: you write far less low-level code and still get most of the performance.
 
-## First-class Parallelism
-
-Almost.
+## First Class
 
 One observation about the state of parallel programming: we've been bolting parallelism onto fundamentally single-threaded languages. Threads, vector intrinsics, CUDA kernels – these are usually provided via libraries, extensions, or compiler tricks layered on top of a base language model that is sequential. As a result, developers have to constantly switch mental models between "normal" serial code and parallel constructs (which often feel foreign to the language). Wouldn't it be nice if parallelism were a native feature of the language itself?
 
@@ -207,7 +203,7 @@ In Mojo, `fn` declares a function, and the loop over `data` is auto-vectorized (
 
 Mojo is still under active development (as of 2025, its GPU programming API is experimental and not yet publicly available). However, it's a promising direction. The goal is that programmers will be able to write portable kernels in Mojo, and the compiler will handle parallelizing and mapping to the hardware efficiently, just like it already does for CPU SIMD.
 
-Other emerging project in this vein are Bend/HVM and, to some extent, JAX.
+Another emerging project in this vein is Bend and, to some extent, Verilog as well as other HDL languages.
 
 ## Resources
 

@@ -41,7 +41,7 @@ def render_post(md_path: Path) -> str:
       <nav>
         <ul>
           <li><a href="../../index.html">Home</a></li>
-          <li><a href="../../writings.html">Writings</a></li>
+          <li><a href="../../writing.html">Writing</a></li>
           <li>
             <a href="https://scholar.google.com/citations?user=JZThC2cAAAAJ">
               Research
@@ -61,8 +61,8 @@ def render_post(md_path: Path) -> str:
     return html_template
 
 
-def render_writings() -> None:
-    """Render writings.html with entries for all writings posts."""
+def render_writing() -> None:
+    """Render writing.html with entries for all writing posts."""
 
     md_files = sorted(Path("posts/markdown").rglob("*.md"))
 
@@ -83,14 +83,14 @@ def render_writings() -> None:
     # Sort posts by date descending (newest first)
     post_data.sort(key=lambda x: datetime.strptime(x[1], "%B %d, %Y"), reverse=True)
 
-    # Modify writings.html
-    writings_html_path = Path("writings.html")
-    soup = BeautifulSoup(writings_html_path.read_text(encoding="utf-8"), "html.parser")
+    # Modify writing.html
+    writing_html_path = Path("writing.html")
+    soup = BeautifulSoup(writing_html_path.read_text(encoding="utf-8"), "html.parser")
 
     # Find the div for post links
     post_links_div = soup.find(id="post-links")
     if post_links_div is None:
-        raise RuntimeError("No element with id='post-links' found in writings.html")
+        raise RuntimeError("No element with id='post-links' found in writing.html")
 
     # Clear existing content
     post_links_div.clear()  # type: ignore
@@ -107,8 +107,8 @@ def render_writings() -> None:
         date_tag.string = date_str
         post_links_div.append(date_tag)
 
-    # Write the updated writings.html
-    writings_html_path.write_text(str(soup), encoding="utf-8")
+    # Write the updated writing.html
+    writing_html_path.write_text(str(soup), encoding="utf-8")
 
 
 def main() -> None:
@@ -125,9 +125,9 @@ def main() -> None:
         html_file_path.write_text(html_content, encoding="utf-8")
         subprocess.run(["prettier", "--write", str(html_file_path)], check=False)
 
-    # Update the writings listing
-    render_writings()
-    subprocess.run(["prettier", "--write", "writings.html"], check=False)
+    # Update the writing listing
+    render_writing()
+    subprocess.run(["prettier", "--write", "writing.html"], check=False)
 
 
 if __name__ == "__main__":
