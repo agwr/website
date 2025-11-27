@@ -2,15 +2,15 @@
 
 > April 5, 2025
 
-Yesterday, I spoke at the [Programming Languages Club at Georgia Tech](https://dtyped.netlify.app) about exposing models for parallelism in programming languages in the context of modern deep learning systems. You can find the slides [here](https://drive.google.com/file/d/1Gs3_vpIsAcCgR79eh9m6_rQjnRKktsJQ/view?usp=share_link). This post is a synopsis of the content I went over in my talk.
+Yesterday, I spoke at the [Programming Languages Club at Georgia Tech](https://dtyped.netlify.app) about exposing models for parallelism in programming languages. You can find the slides [here](https://drive.google.com/file/d/1Gs3_vpIsAcCgR79eh9m6_rQjnRKktsJQ/view?usp=share_link). This post attempts to be a digestible overview of the content from my talk.
 
 ## Motivation
 
-In the early days of computing, improving performance was straightforward: make the processor faster. During the 1990s, chip manufacturers simply shrank transistors with each generation, as described by Moore's Law (transistor density doubling roughly every two years). Smaller transistors meant more of them could fit in the same area and signals had shorter distances to travel, yielding higher clock speeds and lower power per operation. For a while, clock speeds and transistor counts increased hand-in-hand, making programs run faster without any changes to software.
+In the early days of computing, improving performance was relatively straightforward at a high level: make the processor faster. During the 1990s, chip manufacturers simply shrank transistors with each generation, as described by Moore's Law (transistor density doubling roughly every two years). Smaller transistors meant more of them could fit in the same area and signals had shorter distances to travel, yielding higher clock speeds and lower power per operation. For a while, clock speeds and transistor counts increased hand-in-hand, making programs run faster without any changes to software.
 
 However, this approach hit physical limits. As transistors got denser, chips ran into problems with heat dissipation and manufacturing complexity (e.g. the challenges of 3nm and smaller process nodes). Chip designers reached a point of diminishing returns: simply adding more transistors or upping the clock rate began to yield less improvement, while generating more heat and cost. You can only squeeze so much juice from the same lemon before it runs dry.
 
-The industry's response in the mid-2000s was to scale out horizontally by adding multiple processing cores on a single chip. Instead of one super-fast core, you get several moderately fast cores working in parallel. For example, an Apple M1 Pro has 8 cores, and high-end server processors (like Intel Xeon) have up to 144 cores. Each core can run tasks in parallel independently, so an application can theoretically run N times faster with N cores. Unfortunately, this is often not the case due to various factors (context switches, communication overhead, etc.).
+The industry's response in the mid-2000s was to scale out horizontally by adding multiple processing cores on a single chip. Instead of one ultra-fast core, you get several moderately fast cores working in parallel. For example, an Apple M1 Pro has 8 cores, and high-end server processors like Intel's Graphite Rapids Xeon processors have up to 144 cores. Each core can run tasks in parallel independently, so an application can theoretically run N times faster with N cores. Unfortunately, this is often not the case due to various factors (context switches, communication overhead, etc.).
 
 ## Formations
 
@@ -18,7 +18,7 @@ The industry's response in the mid-2000s was to scale out horizontally by adding
 2. Model Parallelism: splitting a single model across multiple devices so different parts of the model execute concurrently (e.g., allocating model experts to different devices).
 3. Pipeline Parallelism: breaking a computation into stages and executing those stages in a pipeline across multiple devices. While one stage is processing batch n, the next stage can process batch n - 1, and so on (e.g., training networks where layers are partitioned and pipelined across devices).
 
-Modern high performance computing and deep learning often combines these forms. In this post, we'll mostly concentrate on data parallelism – making an algorithm execute faster by applying it in parallel on many data elements.
+Modern high performance computing and deep learning systems often combines these forms. In this post, we'll mostly concentrate on data parallelism – making an algorithm execute faster by applying it in parallel on many data elements.
 
 ## Vector Instructions
 
@@ -80,7 +80,7 @@ for (std::size_t i = 0; i < data.size(); ++i) {
 }
 ```
 
-This is a terrible idea – it would launch 160,000 threads! The overhead of creating and scheduling that many threads would overwhelm any gain from parallelism. In fact, it would likely run slower than just doing the loop in one thread, due to context switch overhead and contention. Modern CPUs also feature Hyper-Threading (Intel) or similar simultaneous multithreading, where each core can run two hardware threads, but those still share the core's execution units. Hyper-threading can improve throughput for workloads that often wait on memory, but it doesn't double performance and can hurt latency-sensitive tasks. In general, you want at most one thread per physical core for heavy compute work.
+This is quite suboptimal since it would launch 160,000 threads. The overhead of creating and scheduling that many threads would overwhelm any gain from parallelism. In fact, it would likely run slower than just doing the loop in one thread, due to context switch overhead and contention. Modern CPUs also feature Hyper-Threading (Intel) or similar simultaneous multithreading, where each core can run two hardware threads, but those still share the core's execution units. Hyper-threading can improve throughput for workloads that often wait on memory, but it doesn't double performance and can hurt latency-sensitive tasks. In general, you want at most one thread per physical core for heavy compute work.
 
 A smarter strategy for the example above is to use a fixed number of threads equal to the core count, and divide the array into chunks. For 160,000 elements on 8 cores, each thread can handle 20,000 elements:
 

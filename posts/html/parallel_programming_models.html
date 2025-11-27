@@ -245,24 +245,25 @@
           <a href="https://dtyped.netlify.app"
             >Programming Languages Club at Georgia Tech</a
           >
-          about exposing models for parallelism in programming languages in the
-          context of modern deep learning systems. You can find the slides
+          about exposing models for parallelism in programming languages. You
+          can find the slides
           <a
             href="https://drive.google.com/file/d/1Gs3_vpIsAcCgR79eh9m6_rQjnRKktsJQ/view?usp=share_link"
             >here</a
-          >. This post is a synopsis of the content I went over in my talk.
+          >. This post attempts to be a digestible overview of the content from
+          my talk.
         </p>
         <h2>Motivation</h2>
         <p>
-          In the early days of computing, improving performance was
-          straightforward: make the processor faster. During the 1990s, chip
-          manufacturers simply shrank transistors with each generation, as
-          described by Moore's Law (transistor density doubling roughly every
-          two years). Smaller transistors meant more of them could fit in the
-          same area and signals had shorter distances to travel, yielding higher
-          clock speeds and lower power per operation. For a while, clock speeds
-          and transistor counts increased hand-in-hand, making programs run
-          faster without any changes to software.
+          In the early days of computing, improving performance was relatively
+          straightforward at a high level: make the processor faster. During the
+          1990s, chip manufacturers simply shrank transistors with each
+          generation, as described by Moore's Law (transistor density doubling
+          roughly every two years). Smaller transistors meant more of them could
+          fit in the same area and signals had shorter distances to travel,
+          yielding higher clock speeds and lower power per operation. For a
+          while, clock speeds and transistor counts increased hand-in-hand,
+          making programs run faster without any changes to software.
         </p>
         <p>
           However, this approach hit physical limits. As transistors got denser,
@@ -276,13 +277,13 @@
         <p>
           The industry's response in the mid-2000s was to scale out horizontally
           by adding multiple processing cores on a single chip. Instead of one
-          super-fast core, you get several moderately fast cores working in
+          ultra-fast core, you get several moderately fast cores working in
           parallel. For example, an Apple M1 Pro has 8 cores, and high-end
-          server processors (like Intel Xeon) have up to 144 cores. Each core
-          can run tasks in parallel independently, so an application can
-          theoretically run N times faster with N cores. Unfortunately, this is
-          often not the case due to various factors (context switches,
-          communication overhead, etc.).
+          server processors like Intel's Graphite Rapids Xeon processors have up
+          to 144 cores. Each core can run tasks in parallel independently, so an
+          application can theoretically run N times faster with N cores.
+          Unfortunately, this is often not the case due to various factors
+          (context switches, communication overhead, etc.).
         </p>
         <h2>Formations</h2>
         <ol>
@@ -305,8 +306,8 @@
           </li>
         </ol>
         <p>
-          Modern high performance computing and deep learning often combines
-          these forms. In this post, we'll mostly concentrate on data
+          Modern high performance computing and deep learning systems often
+          combines these forms. In this post, we'll mostly concentrate on data
           parallelism – making an algorithm execute faster by applying it in
           parallel on many data elements.
         </p>
@@ -432,7 +433,7 @@
         </div>
 
         <p>
-          This is a terrible idea – it would launch 160,000 threads! The
+          This is quite suboptimal since it would launch 160,000 threads. The
           overhead of creating and scheduling that many threads would overwhelm
           any gain from parallelism. In fact, it would likely run slower than
           just doing the loop in one thread, due to context switch overhead and
