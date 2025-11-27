@@ -251,41 +251,46 @@
             href="https://drive.google.com/file/d/1Gs3_vpIsAcCgR79eh9m6_rQjnRKktsJQ/view?usp=share_link"
             >here</a
           >. This post attempts to be a digestible overview of the content from
-          my talk.
+          my talk, framed in part in the context of modern deep learning
+          systems.
         </p>
         <h2>Motivation</h2>
         <p>
-          In the early days of computing, improving performance was, at a high
-          level, relatively straightforward: make the processor faster. During
-          the 1990s, chip manufacturers simply shrank transistors with each
-          generation, as described by Moore's Law (transistor density doubling
-          roughly every two years). Smaller transistors meant more of them could
-          fit in the same area and signals had shorter distances to travel,
-          yielding higher clock speeds and lower power per operation. For a
-          while, clock speeds and transistor counts increased hand-in-hand,
-          making programs run faster without any changes to software.
+          In the early days of computing, improving performance was relatively
+          straightforward: make the processor faster. During the 1990s, chip
+          manufacturers simply shrank transistors with each generation, as
+          described by Moore's Law (transistor density doubling roughly every
+          two years). Smaller transistors meant more of them could fit in the
+          same area and signals had shorter distances to travel, yielding higher
+          clock speeds and lower power per operation. For a while, clock speeds
+          and transistor counts increased hand-in-hand, making programs run
+          faster without any changes to software.
         </p>
         <p>
           However, this approach hit physical limits. As transistors got denser,
           chips ran into problems with heat dissipation and manufacturing
           complexity (e.g. the challenges of 3nm and smaller process nodes).
-          Chip designers reached a point of diminishing returns: simply adding
-          more transistors or upping the clock rate began to yield less
-          improvement, while generating more heat and cost. You can only squeeze
-          so much juice from the same lemon before it runs dry.
+          Chip designers reached a point of diminishing returns: just adding
+          more transistors or increasing the clock rate began to yield less
+          improvement while generating more heat and being more expensive.
         </p>
         <p>
           The industry's response in the mid-2000s was to scale out horizontally
           by adding multiple processing cores on a single chip. Instead of one
-          ultra-fast core, you get several moderately fast cores working in
-          parallel. For example, an Apple M1 Pro has 8 cores, and high-end
-          server processors like Intel's Graphite Rapids Xeon processors have up
-          to 144 cores. Each core can run tasks in parallel independently, so an
-          application can theoretically run N times faster with N cores.
-          Unfortunately, this is often not the case due to various factors
-          (context switches, communication overhead, etc.).
+          ultra-fast core, you got several moderately fast cores working in
+          parallel. For example, an Apple M1 Pro has 8 or 10 cores, and high-end
+          server processors like Intel's Granite Rapids Xeon processors can
+          scale to well over 100 cores per socket. Each core can run tasks in
+          parallel independently, so an application can theoretically run N
+          times faster with N cores. Unfortunately, this is often not the case
+          due to various factors (context switches, communication overhead,
+          etc.).
         </p>
         <h2>Formations</h2>
+        <p>
+          Before diving deeper, it's useful to understand the types of
+          parallelism found in modern processors and systems.
+        </p>
         <ol>
           <li>
             Data Parallelism: performing the same operation on different pieces
@@ -293,9 +298,9 @@
             parallel).
           </li>
           <li>
-            Model Parallelism: splitting a single model across multiple devices
-            so different parts of the model execute concurrently (e.g.,
-            allocating model experts to different devices).
+            Functional Parallelism: splitting a computation across multiple
+            devices so different parts of the computation execute concurrently
+            (e.g., allocating model experts to different devices).
           </li>
           <li>
             Pipeline Parallelism: breaking a computation into stages and
@@ -307,8 +312,8 @@
         </ol>
         <p>
           Modern high performance computing and deep learning systems often
-          combines these forms. In this post, we'll mostly concentrate on data
-          parallelism – making an algorithm execute faster by applying it in
+          combine these forms. In this post, we'll mostly concentrate on data
+          parallelism — making an algorithm execute faster by applying it in
           parallel on many data elements.
         </p>
         <h2>Vector Instructions</h2>
@@ -336,7 +341,7 @@
           Under the hood, using SIMD means utilizing these wide registers and
           the corresponding instruction set extensions (SSE, AVX on x86, NEON on
           ARM, etc.). High-level languages usually expose SIMD through
-          intrinsics – special macros that map directly to SIMD instructions.
+          intrinsics — special macros that map directly to SIMD instructions.
           For instance, here's a simple example using ARM NEON intrinsics to add
           two vectors of integers:
         </p>
@@ -369,7 +374,7 @@
         <div class="codehilite">
           <pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">1030</span><span class="p">],</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="mi">1030</span><span class="p">],</span><span class="w"> </span><span class="n">result</span><span class="p">[</span><span class="mi">1030</span><span class="p">];</span>
 
-<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="k">for</span><span class="w"> </span><span class="p">(;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">1030</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="n">int32x4_t</span><span class="w"> </span><span class="n">va</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vld1q_s32</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span><span class="w">      </span><span class="c1">// Load 4 elements from `a` into a SIMD vector</span>
@@ -405,27 +410,27 @@
         </p>
         <h2>Threading</h2>
         <p>
-          To leverage multiple CPU cores, we use threads. A thread is the
-          smallest unit of execution that can run concurrently with other
-          threads while sharing the same memory space. Most languages offer an
-          API for spawning threads (OS-managed threads) and some have
-          higher-level abstractions (like thread pools or "green" user-space
-          threads). The operating system's scheduler distributes time slices on
-          CPU cores for each thread in a process. In a multi-core system,
-          threads can potentially run in parallel (on different cores) – not
-          just interleaved by time slicing.
+          To leverage multiple CPU cores, we use processes and threads. A thread
+          is the smallest unit of execution that can run concurrently with other
+          threads while sharing the memory space allocated to their process.
+          Most languages offer an API for spawning threads (OS-managed threads)
+          and some have higher-level abstractions (like thread pools or "green"
+          user-space threads). The operating system's scheduler distributes time
+          slices on CPU cores for each thread in a process. In a multi-core
+          system, threads can potentially run in parallel (on different cores) —
+          not just interleaved by time slicing.
         </p>
         <p>
           Creating a new OS thread is relatively expensive (it generally
           involves a system call and allocations), so you don't want to spawn
-          threads frivolously. For example, suppose we want to multiply every
+          threads insensibly. For example, suppose we want to multiply every
           element in a large array by 2 using an 8-core CPU. One naive approach
           would be to create a new thread for each element in the array:
         </p>
         <div class="codehilite">
           <pre><span></span><code><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="mi">160000</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="cm">/*...*/</span><span class="p">};</span>
 
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="c1">// Spawn a thread to double `a[i]`</span>
 <span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="p">([</span><span class="o">&amp;</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="p">}).</span><span class="n">detach</span><span class="p">();</span>
 <span class="p">}</span>
@@ -442,8 +447,9 @@
           hardware threads, but those still share the core's execution units.
           Hyper-threading can improve throughput for workloads that often wait
           on memory, but it doesn't double performance and can hurt
-          latency-sensitive tasks. In general, you want at most one thread per
-          physical core for heavy compute work.
+          latency-sensitive tasks. In general, for heavy compute-bound work you
+          often want around one thread per physical core; extra threads can help
+          hide latency in some workloads but don't magically multiply compute.
         </p>
         <p>
           A smarter strategy for the example above is to use a fixed number of
@@ -452,16 +458,16 @@
         </p>
         <div class="codehilite">
           <pre><span></span><code><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="mi">160000</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="cm">/*...*/</span><span class="p">};</span>
-<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">core_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span>
-<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">chunk_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">core_count</span><span class="p">;</span>
+<span class="kt">size_t</span><span class="w"> </span><span class="n">core_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span>
+<span class="kt">size_t</span><span class="w"> </span><span class="n">chunk_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">core_count</span><span class="p">;</span>
 
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">core_count</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">chunk_size</span><span class="p">;</span>
-<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">chunk_size</span><span class="p">;</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">core_count</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">chunk_size</span><span class="p">;</span>
+<span class="w">  </span><span class="kt">size_t</span><span class="w"> </span><span class="n">end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">chunk_size</span><span class="p">;</span>
 
 <span class="w">  </span><span class="c1">// Launch thread to double all elements in assigned chunk</span>
 <span class="w">  </span><span class="n">threads</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">([</span><span class="o">&amp;</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">start</span><span class="p">,</span><span class="w"> </span><span class="n">end</span><span class="p">]</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">start</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">end</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">j</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">start</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">end</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">j</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 <span class="w">  </span><span class="p">});</span>
 <span class="p">}</span>
 </code></pre>
@@ -493,8 +499,8 @@
 <span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">y</span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
 <span class="p">}</span><span class="w"> </span><span class="n">foo</span><span class="p">;</span>
 
-<span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="w"> </span><span class="n">t1</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1&#39;000&#39;000</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">++</span><span class="n">foo</span><span class="p">.</span><span class="n">x</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">});</span>
-<span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="w"> </span><span class="n">t2</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1&#39;000&#39;000</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">++</span><span class="n">foo</span><span class="p">.</span><span class="n">y</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">});</span>
+<span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="w"> </span><span class="n">t1</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1&#39;000&#39;000</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">++</span><span class="n">foo</span><span class="p">.</span><span class="n">x</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">});</span>
+<span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="w"> </span><span class="n">t2</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1&#39;000&#39;000</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">++</span><span class="n">foo</span><span class="p">.</span><span class="n">y</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">});</span>
 </code></pre>
         </div>
 
@@ -503,7 +509,7 @@
           <code>foo</code>. Here, <code>x</code> and <code>y</code> will be on
           the same cache line. This will trigger continuous cache invalidation
           traffic between the two cores as they each modify their part of
-          <code>foo</code> – thrashing the cache line back and forth.
+          <code>foo</code> — thrashing the cache line back and forth.
         </p>
         <p>
           To address false sharing, we can pad or separate data so that
@@ -512,15 +518,15 @@
           <code>y</code>:
         </p>
         <div class="codehilite">
-          <pre><span></span><code><span class="k">constexpr</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">cacheline_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">hardware_destructive_interference_size</span><span class="p">;</span>
+          <pre><span></span><code><span class="k">constexpr</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">cacheline_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">hardware_destructive_interference_size</span><span class="p">;</span>
 
 <span class="k">struct</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="k">alignas</span><span class="p">(</span><span class="n">cacheline_size</span><span class="p">)</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">x</span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
 <span class="w">  </span><span class="k">alignas</span><span class="p">(</span><span class="n">cacheline_size</span><span class="p">)</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">y</span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
 <span class="p">}</span><span class="w"> </span><span class="n">foo</span><span class="p">;</span>
 
-<span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="w"> </span><span class="n">t1</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1&#39;000&#39;000</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">++</span><span class="n">foo</span><span class="p">.</span><span class="n">x</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">});</span>
-<span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="w"> </span><span class="n">t2</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1&#39;000&#39;000</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">++</span><span class="n">foo</span><span class="p">.</span><span class="n">y</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">});</span>
+<span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="w"> </span><span class="n">t1</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1&#39;000&#39;000</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">++</span><span class="n">foo</span><span class="p">.</span><span class="n">x</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">});</span>
+<span class="n">std</span><span class="o">::</span><span class="kr">thread</span><span class="w"> </span><span class="n">t2</span><span class="p">([</span><span class="o">&amp;</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1&#39;000&#39;000</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">++</span><span class="n">foo</span><span class="p">.</span><span class="n">y</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">});</span>
 </code></pre>
         </div>
 
@@ -563,18 +569,18 @@
           Importantly, GPU threads follow a different execution model known as
           SIMT (Single Instruction, Multiple Threads). Threads are executed in
           warps (e.g. 32 threads in NVIDIA GPUs) that proceed in lockstep on the
-          same instruction. In effect, a warp is like a 32-wide SIMD unit – all
-          threads run the same instruction at a time. They can have different
-          data and even take different control paths, but when a warp diverges
-          (e.g. an if/else where half the threads take the if-branch and half
-          take else), the GPU will execute one branch first on those threads
-          while the others are inactive, then the other branch. This means
-          divergent branching within a warp incurs a serial execution of the
-          divergent paths (affecting performance). To get best performance on
-          GPUs, you want threads in a warp to execute the same path as much as
-          possible. Unlike CPU threads, which are fully independent, GPU threads
-          in a warp must execute in lockstep (at least at the granularity of
-          warp instructions).
+          same instruction. In effect, a warp is conceptually like a 32-wide
+          SIMD unit — all threads run the same instruction at a time. They can
+          have different data and even take different control paths, but when a
+          warp diverges (e.g. an if/else where half the threads take the
+          if-branch and half take else), the GPU will execute one branch first
+          on those threads while the others are inactive, then the other branch.
+          This means divergent branching within a warp incurs a serial execution
+          of the divergent paths (affecting performance). To get best
+          performance on GPUs, you want threads in a warp to execute the same
+          path as much as possible. Unlike CPU threads, which are fully
+          independent, GPU threads in a warp must execute in lockstep (at least
+          at the granularity of warp instructions).
         </p>
         <p>
           Another key difference is memory: the CPU (host) and GPU (device) have
@@ -594,9 +600,10 @@
           that aims to simplify GPU programming while remaining close to
           hardware. Triton provides a JIT compiler that lowers your Pythonic
           kernel code through multiple stages (Triton &gt; Triton IR &gt; MLIR
-          &gt; PTX or other backend). Under the hood it generates code similar
-          to what you'd write in CUDA, but you get to work in Python with
-          auto-parallelization over a grid of threads.
+          &gt; PTX or other backend). Under the hood it generates optimized GPU
+          code comparable to hand-written CUDA, but lets you express kernels in
+          a higher-level Python DSL that abstracts away much of the manual
+          thread and memory management.
         </p>
         <p>
           Below is a simple Triton kernel that multiplies every element of an
@@ -624,40 +631,39 @@
         </div>
 
         <p>
-          Here Triton handles the boilerplate of launching a grid of thread
-          blocks. We specify a block size of 1024 threads. The
-          <code>pid = tl.program_id(axis=0)</code> gives the block index, and
-          then we compute a vector of 1024 offsets for that block. The
-          <code>tl.arange(0, BLOCK_SIZE)</code> construct is like getting a SIMD
-          lane ID for each thread in the block, and <code>tl.load</code>/<code
-            >tl.store</code
-          >
-          operate on all those lanes in parallel with proper masking for
-          out-of-bounds. Essentially, each Triton block processes 1024 elements
-          at a time, and Triton figures out how many blocks to launch to cover
-          all 160,000 elements.
+          Triton takes care of most of the boilerplate for launching GPU work.
+          We specify that each program instance should process 1024 elements,
+          and the grid function determines how many such instances are needed to
+          cover the entire array. The call
+          <code>pid = tl.program_id(axis=0)</code> gives the ID of the current
+          program instance, and <code>tl.arange(0, BLOCK_SIZE)</code> produces a
+          vector of 1024 lane offsets within that instance. These lanes behave
+          like a small SIMD group: <code>tl.load</code> and
+          <code>tl.store</code> operate over the whole vector in parallel, with
+          masking to handle out-of-bounds indices. In effect, each Triton
+          program instance handles a 1024-element chunk, and Triton launches as
+          many program instances as required to process all 160,000 elements.
         </p>
         <p>
-          Triton's goal is to be portable across GPU vendors (and potentially
-          other accelerators), not just NVIDIA. This is why it leans on MLIR to
-          eventually target various backends. The downside is that achieving
-          peak performance on every new hardware requires a lot of compiler
-          intelligence. It's difficult to encode all the low-level architectural
-          quirks in a portable compiler, so hand-tuned vendor-specific libraries
-          can still have an edge. In practice, Triton often gets close-to-native
-          performance but not absolute maximum. For example, optimized Triton
-          kernels have achieved around 75% of the throughput of equivalent cuDNN
-          (NVIDIA's highly optimized library) kernels. In one benchmark on
-          transformer-layer operations, Triton implementations were typically
-          within 1.2-1.5x of CUDA's performance (some nearly equal). This is a
-          great trade-off for many cases: you write far less low-level code and
-          still get most of the performance.
+          Triton aims to be portable across GPU vendors (and potentially other
+          accelerators), which is why it builds on MLIR to target multiple
+          backends. The challenge is that a single portable compiler struggles
+          to capture every low-level architectural detail, so vendor-tuned
+          libraries like cuDNN or cuBLAS still hold an edge in achieving SOTA
+          kernel performance. In practice, Triton often delivers near-CUDA
+          performance: in recent Llama inference benchmarks, fully Triton-based
+          models achieved around 78%–82% of equivalent CUDA kernel throughput on
+          H100 and A100 GPUs. On core kernels (like matmul and attention),
+          Triton implementations were typically 1.2-1.6× slower than the
+          hand-tuned cuDNN and cuBLAS variants [4]. For many applications, this
+          is a strong trade-off: you write far less low-level code while
+          retaining most of the performance.
         </p>
         <h2>First Class</h2>
         <p>
           One observation about the state of parallel programming: we've been
           bolting parallelism onto fundamentally single-threaded languages.
-          Threads, vector intrinsics, CUDA kernels – these are usually provided
+          Threads, vector intrinsics, CUDA kernels — these are usually provided
           via libraries, extensions, or compiler tricks layered on top of a base
           language model that is sequential. As a result, developers have to
           constantly switch mental models between "normal" serial code and
@@ -734,12 +740,13 @@
           like it already does for CPU SIMD.
         </p>
         <p>
-          Another emerging project in this vein is Bend and, to some extent,
-          Verilog as well as other HDL languages.
+          Another emerging project in this space is Bend, which explores
+          parallelism-first language design, though in a very different style
+          than Mojo.
         </p>
         <h2>Resources</h2>
         <p>
-          [0] Introduction to High Performance Scientific Computing – Victor
+          [0] Introduction to High Performance Scientific Computing — Victor
           Eijkhout
         </p>
         <p>
@@ -759,6 +766,12 @@
           [3]
           <a href="https://docs.modular.com/mojo/manual/"
             >https://docs.modular.com/mojo/manual/</a
+          >
+        </p>
+        <p>
+          [4]
+          <a href="https://pytorch.org/blog/cuda-free-inference-for-llms/"
+            >https://pytorch.org/blog/cuda-free-inference-for-llms/</a
           >
         </p>
       </main>
