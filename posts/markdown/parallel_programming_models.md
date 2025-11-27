@@ -6,7 +6,7 @@ Yesterday, I spoke at the [Programming Languages Club at Georgia Tech](https://d
 
 ## Motivation
 
-In the early days of computing, improving performance was relatively straightforward at a high level: make the processor faster. During the 1990s, chip manufacturers simply shrank transistors with each generation, as described by Moore's Law (transistor density doubling roughly every two years). Smaller transistors meant more of them could fit in the same area and signals had shorter distances to travel, yielding higher clock speeds and lower power per operation. For a while, clock speeds and transistor counts increased hand-in-hand, making programs run faster without any changes to software.
+In the early days of computing, improving performance was, at a high level, relatively straightforward: make the processor faster. During the 1990s, chip manufacturers simply shrank transistors with each generation, as described by Moore's Law (transistor density doubling roughly every two years). Smaller transistors meant more of them could fit in the same area and signals had shorter distances to travel, yielding higher clock speeds and lower power per operation. For a while, clock speeds and transistor counts increased hand-in-hand, making programs run faster without any changes to software.
 
 However, this approach hit physical limits. As transistors got denser, chips ran into problems with heat dissipation and manufacturing complexity (e.g. the challenges of 3nm and smaller process nodes). Chip designers reached a point of diminishing returns: simply adding more transistors or upping the clock rate began to yield less improvement, while generating more heat and cost. You can only squeeze so much juice from the same lemon before it runs dry.
 
