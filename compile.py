@@ -34,6 +34,22 @@ def render_post(md_path: Path) -> str:
       {css_code_highlighting}
       .codehilite {{ background: transparent; }}
     </style>
+    <script>
+      window.MathJax = {{
+        tex: {{
+          inlineMath: [["$", "$"], ["\\(", "\\)"]],
+          displayMath: [["$$", "$$"], ["\\[", "\\]"]],
+        }},
+        options: {{
+          skipHtmlTags: ["script", "style", "noscript", "textarea", "pre", "code"],
+        }},
+      }};
+    </script>
+    <script
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
     <title>Ayush Gundawar</title>
   </head>
   <body>
