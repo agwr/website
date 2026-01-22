@@ -4,6 +4,27 @@ from datetime import datetime
 import markdown
 from bs4 import BeautifulSoup
 from pygments.formatters import HtmlFormatter
+import re
+
+
+_FENCED_CODE_RE = re.compile(r"```.*?```", re.DOTALL)
+_INLINE_CODE_RE = re.compile(r"`[^`]*`")
+_BLOCK_MATH_RE = re.compile(r"\$\$.*?\$\$", re.DOTALL)
+_INLINE_MATH_RE = re.compile(r"(?<!\\)\$(?!\$)([^$\n]|\\\$)+(?<!\\)\$")
+
+
+def has_latex(md_content: str) -> bool:
+    without_code = _FENCED_CODE_RE.sub("", md_content)
+    without_code = _INLINE_CODE_RE.sub("", without_code)
+
+    return bool(
+        _BLOCK_MATH_RE.search(without_code)
+        or _INLINE_MATH_RE.search(without_code)
+        or "\\(" in without_code
+        or "\\)" in without_code
+        or "\\[" in without_code
+        or "\\]" in without_code
+    )
 
 
 def render_post(md_path: Path) -> str:
@@ -22,6 +43,27 @@ def render_post(md_path: Path) -> str:
     css_code_highlighting = css_code_highlighting.replace("bold", "normal")
     css_code_highlighting = css_code_highlighting.replace("italic", "normal")
 
+    mathjax_block = ""
+    if has_latex(md_content):
+        mathjax_block = """
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [["$", "$"], ["\\\\(", "\\\\)"]],
+          displayMath: [["$$", "$$"], ["\\\\[", "\\\\]"]],
+        },
+        options: {
+          skipHtmlTags: ["script", "style", "noscript", "textarea", "pre", "code"],
+        },
+      };
+    </script>
+    <script
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+"""
+
     # Wrap in an HTML template
     html_template = f"""
 <!DOCTYPE html>
@@ -34,22 +76,7 @@ def render_post(md_path: Path) -> str:
       {css_code_highlighting}
       .codehilite {{ background: transparent; }}
     </style>
-    <script>
-      window.MathJax = {{
-        tex: {{
-          inlineMath: [["$", "$"], ["\\(", "\\)"]],
-          displayMath: [["$$", "$$"], ["\\[", "\\]"]],
-        }},
-        options: {{
-          skipHtmlTags: ["script", "style", "noscript", "textarea", "pre", "code"],
-        }},
-      }};
-    </script>
-    <script
-      id="MathJax-script"
-      async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
-    ></script>
+    {mathjax_block}
     <title>Ayush Gundawar</title>
   </head>
   <body>
