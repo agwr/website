@@ -219,6 +219,35 @@
         background: transparent;
       }
     </style>
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\(", "\)"],
+          ],
+          displayMath: [
+            ["$$", "$$"],
+            ["\[", "\]"],
+          ],
+        },
+        options: {
+          skipHtmlTags: [
+            "script",
+            "style",
+            "noscript",
+            "textarea",
+            "pre",
+            "code",
+          ],
+        },
+      };
+    </script>
+    <script
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
     <title>Ayush Gundawar</title>
   </head>
   <body>
@@ -654,7 +683,7 @@
           performance: in recent Llama inference benchmarks, fully Triton-based
           models achieved around 78%–82% of equivalent CUDA kernel throughput on
           H100 and A100 GPUs. On core kernels (like matmul and attention),
-          Triton implementations were typically 1.2-1.6× slower than the
+          Triton implementations were typically 1.2-1.6x slower than the
           hand-tuned cuDNN and cuBLAS variants [4]. For many applications, this
           is a strong trade-off: you write far less low-level code while
           retaining most of the performance.
