@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../../stylesheets/styles.css" />
+    <style>
+      pre {
+        line-height: 125%;
+      }
+      td.linenos .normal {
+        color: inherit;
+        background-color: transparent;
+        padding-left: 5px;
+        padding-right: 5px;
+      }
+      span.linenos {
+        color: inherit;
+        background-color: transparent;
+        padding-left: 5px;
+        padding-right: 5px;
+      }
+      td.linenos .special {
+        color: #000000;
+        background-color: #ffffc0;
+        padding-left: 5px;
+        padding-right: 5px;
+      }
+      span.linenos.special {
+        color: #000000;
+        background-color: #ffffc0;
+        padding-left: 5px;
+        padding-right: 5px;
+      }
+      .codehilite .hll {
+        background-color: #ffffcc;
+      }
+      .codehilite {
+        background: #ffffff;
+      }
+      .codehilite .c {
+        color: #95a5a6;
+      } /* Comment */
+      .codehilite .err {
+        color: #a61717;
+      } /* Error */
+      .codehilite .k {
+        color: #728e00;
+      } /* Keyword */
+      .codehilite .n {
+        color: #434f54;
+      } /* Name */
+      .codehilite .o {
+        color: #728e00;
+      } /* Operator */
+      .codehilite .ch {
+        color: #95a5a6;
+      } /* Comment.Hashbang */
+      .codehilite .cm {
+        color: #95a5a6;
+      } /* Comment.Multiline */
+      .codehilite .cp {
+        color: #728e00;
+      } /* Comment.Preproc */
+      .codehilite .cpf {
+        color: #95a5a6;
+      } /* Comment.PreprocFile */
+      .codehilite .c1 {
+        color: #95a5a6;
+      } /* Comment.Single */
+      .codehilite .cs {
+        color: #95a5a6;
+      } /* Comment.Special */
+      .codehilite .kc {
+        color: #00979d;
+      } /* Keyword.Constant */
+      .codehilite .kd {
+        color: #728e00;
+      } /* Keyword.Declaration */
+      .codehilite .kn {
+        color: #728e00;
+      } /* Keyword.Namespace */
+      .codehilite .kp {
+        color: #00979d;
+      } /* Keyword.Pseudo */
+      .codehilite .kr {
+        color: #00979d;
+      } /* Keyword.Reserved */
+      .codehilite .kt {
+        color: #00979d;
+      } /* Keyword.Type */
+      .codehilite .m {
+        color: #8a7b52;
+      } /* Literal.Number */
+      .codehilite .s {
+        color: #7f8c8d;
+      } /* Literal.String */
+      .codehilite .na {
+        color: #434f54;
+      } /* Name.Attribute */
+      .codehilite .nb {
+        color: #728e00;
+      } /* Name.Builtin */
+      .codehilite .nc {
+        color: #434f54;
+      } /* Name.Class */
+      .codehilite .no {
+        color: #434f54;
+      } /* Name.Constant */
+      .codehilite .nd {
+        color: #434f54;
+      } /* Name.Decorator */
+      .codehilite .ni {
+        color: #434f54;
+      } /* Name.Entity */
+      .codehilite .ne {
+        color: #434f54;
+      } /* Name.Exception */
+      .codehilite .nf {
+        color: #d35400;
+      } /* Name.Function */
+      .codehilite .nl {
+        color: #434f54;
+      } /* Name.Label */
+      .codehilite .nn {
+        color: #434f54;
+      } /* Name.Namespace */
+      .codehilite .nx {
+        color: #728e00;
+      } /* Name.Other */
+      .codehilite .py {
+        color: #434f54;
+      } /* Name.Property */
+      .codehilite .nt {
+        color: #434f54;
+      } /* Name.Tag */
+      .codehilite .nv {
+        color: #434f54;
+      } /* Name.Variable */
+      .codehilite .ow {
+        color: #728e00;
+      } /* Operator.Word */
+      .codehilite .mb {
+        color: #8a7b52;
+      } /* Literal.Number.Bin */
+      .codehilite .mf {
+        color: #8a7b52;
+      } /* Literal.Number.Float */
+      .codehilite .mh {
+        color: #8a7b52;
+      } /* Literal.Number.Hex */
+      .codehilite .mi {
+        color: #8a7b52;
+      } /* Literal.Number.Integer */
+      .codehilite .mo {
+        color: #8a7b52;
+      } /* Literal.Number.Oct */
+      .codehilite .sa {
+        color: #7f8c8d;
+      } /* Literal.String.Affix */
+      .codehilite .sb {
+        color: #7f8c8d;
+      } /* Literal.String.Backtick */
+      .codehilite .sc {
+        color: #7f8c8d;
+      } /* Literal.String.Char */
+      .codehilite .dl {
+        color: #7f8c8d;
+      } /* Literal.String.Delimiter */
+      .codehilite .sd {
+        color: #7f8c8d;
+      } /* Literal.String.Doc */
+      .codehilite .s2 {
+        color: #7f8c8d;
+      } /* Literal.String.Double */
+      .codehilite .se {
+        color: #7f8c8d;
+      } /* Literal.String.Escape */
+      .codehilite .sh {
+        color: #7f8c8d;
+      } /* Literal.String.Heredoc */
+      .codehilite .si {
+        color: #7f8c8d;
+      } /* Literal.String.Interpol */
+      .codehilite .sx {
+        color: #7f8c8d;
+      } /* Literal.String.Other */
+      .codehilite .sr {
+        color: #7f8c8d;
+      } /* Literal.String.Regex */
+      .codehilite .s1 {
+        color: #7f8c8d;
+      } /* Literal.String.Single */
+      .codehilite .ss {
+        color: #7f8c8d;
+      } /* Literal.String.Symbol */
+      .codehilite .bp {
+        color: #728e00;
+      } /* Name.Builtin.Pseudo */
+      .codehilite .fm {
+        color: #d35400;
+      } /* Name.Function.Magic */
+      .codehilite .vc {
+        color: #434f54;
+      } /* Name.Variable.Class */
+      .codehilite .vg {
+        color: #434f54;
+      } /* Name.Variable.Global */
+      .codehilite .vi {
+        color: #434f54;
+      } /* Name.Variable.Instance */
+      .codehilite .vm {
+        color: #434f54;
+      } /* Name.Variable.Magic */
+      .codehilite .il {
+        color: #8a7b52;
+      } /* Literal.Number.Integer.Long */
+      .codehilite {
+        background: transparent;
+      }
+    </style>
+
+    <title>Ayush Gundawar</title>
+  </head>
+  <body>
+    <div class="container">
+      <nav>
+        <ul>
+          <li><a href="../../index.html">Home</a></li>
+          <li><a href="../../writing.html">Writing</a></li>
+          <li>
+            <a href="https://scholar.google.com/citations?user=JZThC2cAAAAJ">
+              Research
+            </a>
+          </li>
+          <li><a href="https://github.com/ayushgun">Software</a></li>
+        </ul>
+      </nav>
+      <main>
+        <h1>Our Stolen Light</h1>
+        <blockquote>
+          <p>February 7, 2026</p>
+        </blockquote>
+        <p>
+          Prometheus didn't steal fire because he loved humanity. He stole it
+          because he couldn't bear watching us shiver in the dark. The
+          punishment – the eagle, the liver, the chaining to the rock, the
+          eternal cycle of pain – wasn't for the theft. It was for the knowing.
+          For understanding that once you give mortals flame, they won't stop at
+          warmth. They'll forge weapons. They'll burn forests. They'll build
+          engines that shake the foundations of Olympus itself.
+        </p>
+        <p>
+          We pretend the choice was ever ours to make. We speak of acceleration
+          as philosophy, as ideology, as if somewhere in history's vast
+          machinery there exists a brake pedal we've collectively decided not to
+          press. But stand in any emergency room at 3 AM and watch the
+          defibrillator's arc restore a mother's heartbeat. The doctor doesn't
+          pause. They can't. The fire is already burning in their hands.
+        </p>
+        <p>
+          Every night, Prometheus's liver grows back. Every night, the eagle
+          returns. The punishment is the eternal loop of damage and
+          regeneration, suffering and necessity. This is acceleration's true
+          face. Not a rocket we can steer or a car we can brake, but a cycle
+          we've locked ourselves into since the first flint struck spark.
+        </p>
+        <p>
+          We must embrace acceleration. We must recognize that we're already
+          Prometheus, already chained to the rock of our own making. Every
+          grandmother video-calling her grandson across continents, every child
+          whose leukemia enters remission, every farmer coaxing abundance from
+          exhausted soil – these aren't victories we can walk away from. They're
+          commitments that demand we keep stealing fire for humanity, keep
+          enduring the eagle, because the alternative is watching the people we
+          love freeze in the dark.
+        </p>
+        <p>
+          Yet the question was never whether to grasp at fire. It's whether we
+          shape it toward human flourishing or let it burn wild. Technology
+          aligned to our deepest values – our resilience in suffering, our drive
+          to create, our need to connect – becomes something more than mere tool
+          or weapon. It becomes the difference between the flame that
+          illuminates and the flame that incinerates. The suffering transforms.
+          Not into absence of pain, but into meaning. We endure the wound
+          because we refuse to abandon those who need the warmth.
+        </p>
+        <p>
+          We are all chained to this rock now. The only choice left is whether
+          we clutch fire that warms or fire that consumes.
+        </p>
+      </main>
+    </div>
+  </body>
+</html>
