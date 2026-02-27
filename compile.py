@@ -90,7 +90,7 @@ def render_post(md_path: Path) -> str:
               Research
             </a>
           </li>
-          <li><a href="https://github.com/ayushgun">Software</a></li>
+          <li><a href="https://github.com/agwr">Software</a></li>
         </ul>
       </nav>
       <main>
