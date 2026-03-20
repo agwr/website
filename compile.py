@@ -13,6 +13,29 @@ _BLOCK_MATH_RE = re.compile(r"\$\$.*?\$\$", re.DOTALL)
 _INLINE_MATH_RE = re.compile(r"(?<!\\)\$(?!\$)([^$\n]|\\\$)+(?<!\\)\$")
 
 
+_MARKDOWN_SYNTAX_RE = re.compile(
+    r"```.*?```"           # fenced code blocks
+    r"|`[^`]*`"            # inline code
+    r"|!\[[^\]]*\]\([^)]*\)"  # images
+    r"|\[[^\]]*\]\([^)]*\)"   # links (keep link text via sub below)
+    r"|^#{1,6}\s+"         # heading markers
+    r"|[*_~`>|]"           # inline formatting markers
+    r"|\d+\.\s"            # ordered list markers
+    r"|[-*+]\s",           # unordered list markers
+    re.MULTILINE | re.DOTALL,
+)
+
+
+def reading_time(md_content: str) -> int:
+    """Estimate reading time in minutes from markdown content (≈ 200 wpm)."""
+    # Strip code blocks and markdown syntax to get prose words
+    text = _FENCED_CODE_RE.sub("", md_content)
+    text = _MARKDOWN_SYNTAX_RE.sub(" ", text)
+    word_count = len(text.split())
+    minutes = max(1, round(word_count / 200))
+    return minutes
+
+
 def has_latex(md_content: str) -> bool:
     without_code = _FENCED_CODE_RE.sub("", md_content)
     without_code = _INLINE_CODE_RE.sub("", without_code)
@@ -81,18 +104,6 @@ def render_post(md_path: Path) -> str:
   </head>
   <body>
     <div class="container">
-      <nav>
-        <ul>
-          <li><a href="../../index.html">Home</a></li>
-          <li><a href="../../writing.html">Writing</a></li>
-          <li>
-            <a href="https://scholar.google.com/citations?user=JZThC2cAAAAJ">
-              Research
-            </a>
-          </li>
-          <li><a href="https://github.com/agwr">Software</a></li>
-        </ul>
-      </nav>
       <main>
         {html_body}
       </main>
@@ -105,53 +116,68 @@ def render_post(md_path: Path) -> str:
 
 
 def render_writing() -> None:
-    """Render writing.html with entries for all writing posts."""
+    """Render the post listing in index.html."""
 
     md_files = sorted(Path("posts/markdown").rglob("*.md"))
 
-    # Extract post data (title, date, corresponding html file name)
+    # Extract post data (title, date, reading time, corresponding html file name)
     post_data = []
     for md_file_path in md_files:
-        lines = md_file_path.read_text(encoding="utf-8").splitlines()
+        md_content = md_file_path.read_text(encoding="utf-8")
+        lines = md_content.splitlines()
 
         # First line: # Title
         # Second line: > Month DD, YYYY
         title_line = lines[0].lstrip("# ").strip()
         date_line = lines[2].lstrip("> ").strip()
+        read_min = reading_time(md_content)
 
         # Corresponding HTML file name
         html_name = md_file_path.with_suffix(".html").name
-        post_data.append((title_line, date_line, html_name))
+        post_data.append((title_line, date_line, read_min, html_name))
 
     # Sort posts by date descending (newest first)
     post_data.sort(key=lambda x: datetime.strptime(x[1], "%B %d, %Y"), reverse=True)
 
-    # Modify writing.html
-    writing_html_path = Path("writing.html")
-    soup = BeautifulSoup(writing_html_path.read_text(encoding="utf-8"), "html.parser")
+    # Modify index.html
+    index_html_path = Path("index.html")
+    soup = BeautifulSoup(index_html_path.read_text(encoding="utf-8"), "html.parser")
 
     # Find the div for post links
     post_links_div = soup.find(id="post-links")
     if post_links_div is None:
-        raise RuntimeError("No element with id='post-links' found in writing.html")
+        raise RuntimeError("No element with id='post-links' found in index.html")
 
     # Clear existing content
     post_links_div.clear()  # type: ignore
 
-    # Add each post
-    for title, date_str, html_name in post_data:
-        # Create a link to the post
-        link_tag = soup.new_tag("a", href=f"posts/html/{html_name}")
-        link_tag.string = title
+    # Add each post as a row with year, title, and reading time
+    for title, date_str, read_min, html_name in post_data:
+        parsed_date = datetime.strptime(date_str, "%B %d, %Y")
+        year = str(parsed_date.year)
+
+        # Create a link row
+        link_tag = soup.new_tag("a", href=f"posts/html/{html_name}", **{"class": "post-row"})
+
+        # Year span
+        year_span = soup.new_tag("span", **{"class": "post-year"})
+        year_span.string = year
+        link_tag.append(year_span)
+
+        # Title span
+        title_span = soup.new_tag("span", **{"class": "post-title"})
+        title_span.string = title
+        link_tag.append(title_span)
+
+        # Reading time span
+        duration_span = soup.new_tag("span", **{"class": "post-duration"})
+        duration_span.string = f"{read_min} min"
+        link_tag.append(duration_span)
+
         post_links_div.append(link_tag)
 
-        # Add a blockquote with the date
-        date_tag = soup.new_tag("blockquote")
-        date_tag.string = date_str
-        post_links_div.append(date_tag)
-
-    # Write the updated writing.html
-    writing_html_path.write_text(str(soup), encoding="utf-8")
+    # Write the updated index.html
+    index_html_path.write_text(str(soup), encoding="utf-8")
 
 
 def main() -> None:
@@ -168,9 +194,9 @@ def main() -> None:
         html_file_path.write_text(html_content, encoding="utf-8")
         subprocess.run(["prettier", "--write", str(html_file_path)], check=False)
 
-    # Update the writing listing
+    # Update the writing listing on the homepage
     render_writing()
-    subprocess.run(["prettier", "--write", "writing.html"], check=False)
+    subprocess.run(["prettier", "--write", "index.html"], check=False)
 
 
 if __name__ == "__main__":

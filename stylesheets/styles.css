@@ -33,7 +33,7 @@ body {
   position: relative;
   max-width: 42.5rem;
   margin: 2rem auto;
-  padding: 2rem 1rem 2rem 4.5rem;
+  padding: 2rem 1rem;
 }
 
 nav {
@@ -148,31 +148,68 @@ a:focus {
   border-color: rgba(31, 79, 107, 0.5);
 }
 
+/* Article listing on homepage */
 #post-links {
-  padding: 1rem 0 0.15rem;
-  margin: 0 0 0.5rem;
+  margin-top: 2.4rem;
 }
 
-#post-links a {
-  display: inline-block;
+.post-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid rgba(214, 210, 196, 0.45);
+  text-decoration: none;
+  color: var(--text);
+  transition:
+    color 150ms ease,
+    border-color 150ms ease;
+}
+
+.post-row:first-child {
+  border-top: 1px solid rgba(214, 210, 196, 0.45);
+}
+
+.post-row:hover,
+.post-row:focus {
+  color: var(--accent);
+  border-color: rgba(214, 210, 196, 0.45);
+}
+
+.post-year {
+  font-family:
+    "EB Garamond", "Linux Libertine", "Iowan Old Style", "Palatino Linotype",
+    "Times New Roman", serif;
+  font-size: 0.85rem;
+  color: var(--accent-soft);
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+  min-width: 2.5rem;
+}
+
+.post-title {
   font-size: 0.95rem;
   letter-spacing: 0.01em;
-  line-height: 1.2;
 }
 
-#post-links blockquote {
-  margin: 0.05rem 0 0.75rem;
-  padding-left: 0;
-  border: none;
-  background: transparent;
-  font-style: normal;
+.post-duration {
+  margin-left: auto;
+  font-size: 0.8rem;
   color: var(--accent-soft);
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.post-row:hover .post-year,
+.post-row:hover .post-duration {
+  color: var(--accent);
 }
 
 @media (max-width: 900px) {
   .container {
     margin: 1rem;
-    padding: 1.5rem 1rem 1.5rem 7rem;
+    padding: 1.5rem 1rem;
   }
 }
 
