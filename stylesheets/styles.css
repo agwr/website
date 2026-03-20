@@ -214,7 +214,7 @@ a:focus {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .container {
     padding: 1.5rem;
   }
