@@ -89,11 +89,17 @@ h6 {
     "Nanum Myeongjo", "Linux Libertine", "Iowan Old Style", "Palatino Linotype",
     "Times New Roman", serif;
   font-weight: 300;
-  font-size: 1.6rem;
   letter-spacing: -0.01em;
   margin-top: 0;
   color: var(--text);
 }
+
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.3rem; }
+h3 { font-size: 1.2rem; }
+h4 { font-size: 1.0rem; }
+h5 { font-size: 0.95rem; }
+h6 { font-size: 0.9rem; }
 
 p {
   font-weight: 500;
