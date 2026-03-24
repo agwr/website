@@ -2,13 +2,14 @@ name: Build and deploy GitHub Pages
 
 on:
   push:
-
-permissions:
-  contents: read
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
 
     steps:
       - name: Checkout
