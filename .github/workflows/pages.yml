@@ -1,0 +1,81 @@
+name: Build and deploy GitHub Pages
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install Prettier
+        run: npm install --global prettier@3
+
+      - name: Build site
+        run: uv run compile.py
+
+      - name: Configure GitHub Pages
+        if: github.ref_name == github.event.repository.default_branch
+        uses: actions/configure-pages@v5
+
+      - name: Prepare Pages artifact
+        if: github.ref_name == github.event.repository.default_branch
+        run: |
+          mkdir -p _site
+          rsync -av \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude '.venv/' \
+            --exclude '_site/' \
+            --exclude 'compile.py' \
+            --exclude 'pyproject.toml' \
+            --exclude 'uv.lock' \
+            --exclude 'posts/markdown/' \
+            ./ _site/
+
+      - name: Upload Pages artifact
+        if: github.ref_name == github.event.repository.default_branch
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    if: github.ref_name == github.event.repository.default_branch
+    needs: build
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
