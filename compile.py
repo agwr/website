@@ -1,11 +1,11 @@
-from pathlib import Path
+import re
 import subprocess
 from datetime import datetime
+from pathlib import Path
+
 import markdown
 from bs4 import BeautifulSoup
 from pygments.formatters import HtmlFormatter
-import re
-
 
 _FENCED_CODE_RE = re.compile(r"```.*?```", re.DOTALL)
 _INLINE_CODE_RE = re.compile(r"`[^`]*`")
@@ -14,14 +14,14 @@ _INLINE_MATH_RE = re.compile(r"(?<!\\)\$(?!\$)([^$\n]|\\\$)+(?<!\\)\$")
 
 
 _MARKDOWN_SYNTAX_RE = re.compile(
-    r"```.*?```"           # fenced code blocks
-    r"|`[^`]*`"            # inline code
+    r"```.*?```"  # fenced code blocks
+    r"|`[^`]*`"  # inline code
     r"|!\[[^\]]*\]\([^)]*\)"  # images
-    r"|\[[^\]]*\]\([^)]*\)"   # links (keep link text via sub below)
-    r"|^#{1,6}\s+"         # heading markers
-    r"|[*_~`>|]"           # inline formatting markers
-    r"|\d+\.\s"            # ordered list markers
-    r"|[-*+]\s",           # unordered list markers
+    r"|\[[^\]]*\]\([^)]*\)"  # links (keep link text via sub below)
+    r"|^#{1,6}\s+"  # heading markers
+    r"|[*_~`>|]"  # inline formatting markers
+    r"|\d+\.\s"  # ordered list markers
+    r"|[-*+]\s",  # unordered list markers
     re.MULTILINE | re.DOTALL,
 )
 
@@ -157,7 +157,9 @@ def render_writing() -> None:
         year = str(parsed_date.year)
 
         # Create a link row
-        link_tag = soup.new_tag("a", href=f"posts/html/{html_name}", **{"class": "post-row"})
+        link_tag = soup.new_tag(
+            "a", href=f"posts/html/{html_name}", **{"class": "post-row"}
+        )
 
         # Year span
         year_span = soup.new_tag("span", **{"class": "post-year"})
