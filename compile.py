@@ -50,6 +50,49 @@ def has_latex(md_content: str) -> bool:
     )
 
 
+def add_smallcaps(html_body: str, num_words: int = 1) -> str:
+    """Wrap the first `num_words` words of the opening paragraph in smallcaps."""
+    from bs4 import NavigableString
+
+    soup = BeautifulSoup(html_body, "html.parser")
+
+    # Find the first <p> that is a direct child (not inside a blockquote)
+    first_p = None
+    for p in soup.find_all("p"):
+        if p.find_parent("blockquote") is None:
+            first_p = p
+            break
+
+    if first_p is None:
+        return html_body
+
+    # Find the first text node in the paragraph (may have inline elements like <a>)
+    first_text = None
+    for child in first_p.children:
+        if isinstance(child, NavigableString) and child.strip():
+            first_text = child
+            break
+
+    if first_text is None:
+        return html_body
+
+    text = str(first_text)
+    words = text.split(None, num_words)
+    if len(words) <= num_words:
+        return html_body
+
+    # Build: <span class="smallcaps">first words</span> rest of text
+    leading = " ".join(words[:num_words])
+    rest = text[len(leading):]
+
+    span = soup.new_tag("span", **{"class": "smallcaps"})
+    span.string = leading
+    first_text.replace_with(span)
+    span.insert_after(rest)
+
+    return str(soup)
+
+
 def render_post(md_path: Path) -> str:
     """Convert raw markdown post content to styled HTML and return as a string."""
 
@@ -59,6 +102,9 @@ def render_post(md_path: Path) -> str:
     # Convert to HTML using markdown with code highlighting extensions include fenced_code
     # and codehilite for syntax highlighting
     html_body = markdown.markdown(md_content, extensions=["fenced_code", "codehilite"])
+
+    # Add smallcaps to the opening word of the first paragraph
+    html_body = add_smallcaps(html_body)
 
     # Create Pygments CSS
     formatter = HtmlFormatter(style="arduino")

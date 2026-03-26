@@ -129,6 +129,12 @@ blockquote {
   color: var(--muted);
 }
 
+.smallcaps {
+  font-variant: small-caps;
+  font-size: 1.1em;
+  letter-spacing: 0.05em;
+}
+
 pre {
   border-radius: 2px;
   background-color: #f6f6f6;

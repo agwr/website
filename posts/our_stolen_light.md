@@ -2,9 +2,7 @@
 
 > February 7, 2026
 
-A single spark is ripped from the blaze of the hearth.
-
-Prometheus didn't steal the flame of the gods because he despised them. He stole it because he couldn't bear watching humanity shiver in the dark. The punishment–the eagle, the chaining, the eternal torture–wasn't for the theft. It was for the knowing. For knowing that once you give humanity a flame, they won't cease at warm. They'll forge weapons. They'll burn forest. They'll build engines that shake the foundations of Olympus itself.
+Prometheus did not steal fire because he despised the gods. He stole it because he couldn't bear watching us shiver in the dark. The punishment–the eagle, the chaining, the eternal torture–wasn't for the theft. It was for the knowing. For knowing that once you give humanity a flame, they won't cease at warmth. They'll forge weapons. They'll burn forests. They'll build engines that shake the foundations of Olympus itself.
 
 We pretend the choice was ever ours to make. We speak of acceleration as philosophy, as ideology, as if somewhere in history's boundless machinery there exists a brake pedal we've collectively decided not to press. But stand in any emergency room at 3 AM and watch the defibrillator's arc restore a mother's pulse. The doctor doesn't pause. They can't. The flame is already burning in their hands.
 
