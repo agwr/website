@@ -1,5 +1,8 @@
 .DS_Store
 
+# Generated HTML from compile.py
+posts/*.html
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

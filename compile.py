@@ -94,7 +94,7 @@ def render_post(md_path: Path) -> str:
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../../stylesheets/styles.css" />
+    <link rel="stylesheet" href="../stylesheets/styles.css" />
     <style>
       {css_code_highlighting}
       .codehilite {{ background: transparent; }}
@@ -118,7 +118,7 @@ def render_post(md_path: Path) -> str:
 def render_writing() -> None:
     """Render the post listing in index.html."""
 
-    md_files = sorted(Path("posts/markdown").rglob("*.md"))
+    md_files = sorted(Path("posts").glob("*.md"))
 
     # Extract post data (title, date, reading time, corresponding html file name)
     post_data = []
@@ -158,7 +158,7 @@ def render_writing() -> None:
 
         # Create a link row
         link_tag = soup.new_tag(
-            "a", href=f"posts/html/{html_name}", **{"class": "post-row"}
+            "a", href=f"posts/{html_name}", **{"class": "post-row"}
         )
 
         # Year span
@@ -183,16 +183,12 @@ def render_writing() -> None:
 
 
 def main() -> None:
-    # Ensure output directory exists
-    html_output_dir = Path("posts/html")
-    html_output_dir.mkdir(parents=True, exist_ok=True)
+    md_files = sorted(Path("posts").glob("*.md"))
 
-    md_files = sorted(Path("posts/markdown").rglob("*.md"))
-
-    # Convert each MD to HTML
+    # Convert each MD to HTML alongside the source markdown
     for md_file_path in md_files:
         html_content = render_post(md_file_path)
-        html_file_path = html_output_dir / md_file_path.with_suffix(".html").name
+        html_file_path = md_file_path.with_suffix(".html")
         html_file_path.write_text(html_content, encoding="utf-8")
         subprocess.run(["prettier", "--write", str(html_file_path)], check=False)
 

@@ -50,7 +50,7 @@ jobs:
             --exclude 'compile.py' \
             --exclude 'pyproject.toml' \
             --exclude 'uv.lock' \
-            --exclude 'posts/markdown/' \
+            --exclude 'posts/*.md' \
             ./ _site/
 
       - name: Upload Pages artifact
