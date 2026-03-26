@@ -190,9 +190,6 @@ a:focus {
 }
 
 .post-year {
-  font-family:
-    "EB Garamond", "Linux Libertine", "Iowan Old Style", "Palatino Linotype",
-    "Times New Roman", serif;
   font-size: 0.85rem;
   color: var(--accent-soft);
   letter-spacing: 0.03em;
