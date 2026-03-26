@@ -10,4 +10,4 @@ We must embrace acceleration. We must recognize that we are, in some sense, Prom
 
 Yet the question was never whether to grasp at fire. It's whether we kindle it toward humanity's prosperity or let it burn wild. Technology aligned to our deepest values–our strength in suffering, our drive to create, our need to connect–becomes something more than trivial tools and weapons. It becomes the difference between the flame that illuminates and the flame that incinerates. The suffering transforms. Not into absence of pain, but into meaning. A torture we endure because we refuse to abandon those who need the warmth.
 
-We are all chained to this rock now. The only choice left is whether we steal fire that warms or fire that consumes.
+We will all be chained to the rock. The only question is whether we stole fire that warms or fire that consumes.
