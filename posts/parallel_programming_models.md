@@ -1,6 +1,6 @@
 # Parallel Programming Models
 
-> April 5, 2025
+> April 5, 2024
 
 Yesterday, I spoke at the [Programming Languages Club at Georgia Tech](https://dtyped.netlify.app) about exposing models for parallelism in programming languages. You can find the slides [here](https://drive.google.com/file/d/1Gs3_vpIsAcCgR79eh9m6_rQjnRKktsJQ/view?usp=share_link). This post attempts to be a digestible overview of the content from my talk, framed in part in the context of modern deep learning systems.
 
@@ -203,7 +203,7 @@ fn mul_mojo(mut data: List[Int32]):
 
 In Mojo, `fn` declares a function, and the loop over `data` is auto-vectorized (for context, `item[]` performs an explicit dereference). Unlike Python, this yields a deterministic ~15x speedup by guaranteeing SIMD execution without relying on pseudo-indeterministic compiler heuristics or manual intrinsics.
 
-Mojo is still under active development (as of 2025, its GPU programming API is experimental and not yet publicly available). However, it's a promising direction. The goal is that programmers will be able to write portable kernels in Mojo, and the compiler will handle parallelizing and mapping to the hardware efficiently, just like it already does for CPU SIMD.
+Mojo is still under active development (as of 2024, its GPU programming API is experimental and not yet publicly available). However, it's a promising direction. The goal is that programmers will be able to write portable kernels in Mojo, and the compiler will handle parallelizing and mapping to the hardware efficiently, just like it already does for CPU SIMD.
 
 Another emerging project in this space is Bend, which explores parallelism-first language design, though in a very different style than Mojo.
 
