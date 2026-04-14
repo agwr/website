@@ -132,6 +132,7 @@ blockquote {
 .smallcaps {
   font-variant: small-caps;
   font-size: 1.1em;
+  font-weight: 600;
   letter-spacing: 0.05em;
 }
 
