@@ -1,39 +1,55 @@
-@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Nanum+Myeongjo:wght@400;700;800&display=swap");
+@font-face {
+  font-family: "et-book";
+  src: url("https://cdn.jsdelivr.net/gh/edwardtufte/et-book@gh-pages/et-book/et-book-roman-line-figures/et-book-roman-line-figures.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "et-book";
+  src: url("https://cdn.jsdelivr.net/gh/edwardtufte/et-book@gh-pages/et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.woff") format("woff");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "et-book";
+  src: url("https://cdn.jsdelivr.net/gh/edwardtufte/et-book@gh-pages/et-book/et-book-bold-line-figures/et-book-bold-line-figures.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --bg: #ffffff;
-  --surface: #fffef9;
-  --text: #1b1c17;
-  --muted: #5a5f52;
-  --accent: #1f4f6b;
-  --accent-soft: #97a5a4;
-  --border: #d6d2c4;
+  --text: #111;
+  --muted: #555;
+  --accent-soft: #888;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  font-size: 12.5px;
+}
+
 body {
   margin: 0;
-  min-height: 100vh;
   background: var(--bg);
   color: var(--text);
-  font-family:
-    "Nanum Myeongjo", "Linux Libertine", "Iowan Old Style", "Palatino Linotype",
-    "Times New Roman", serif;
-  font-size: 0.95rem;
-  line-height: 1.65;
-  letter-spacing: 0.01em;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  font-family: et-book, Palatino, "Palatino Linotype", "Palatino LT STD",
+    "Book Antiqua", Georgia, serif;
 }
 
 .container {
   position: relative;
-  max-width: 42.5rem;
+  max-width: 52rem;
   margin: 2rem auto;
-  padding: 2rem 1rem;
+  padding: 2rem 1rem 4rem;
 }
 
 nav {
@@ -60,23 +76,18 @@ nav li {
 nav a {
   color: inherit;
   text-decoration: none;
-  border-bottom: 1px solid transparent;
   padding-bottom: 0.1rem;
-  transition:
-    color 150ms ease,
-    border-color 150ms ease;
+  transition: color 150ms ease;
 }
 
 nav a:hover,
 nav a:focus {
-  color: var(--accent);
-  border-color: var(--accent-soft);
+  color: var(--text);
 }
 
 main {
-  max-width: 35em;
+  max-width: 44em;
   margin: 0 auto;
-  color: var(--text);
 }
 
 h1,
@@ -85,35 +96,50 @@ h3,
 h4,
 h5,
 h6 {
-  font-family:
-    "Nanum Myeongjo", "Linux Libertine", "Iowan Old Style", "Palatino Linotype",
-    "Times New Roman", serif;
-  font-weight: 300;
-  letter-spacing: -0.01em;
-  margin-top: 0;
-  color: var(--text);
+  font-weight: 400;
 }
 
-h1 { font-size: 1.6rem; }
-h2 { font-size: 1.3rem; }
-h3 { font-size: 1.2rem; }
-h4 { font-size: 1.0rem; }
-h5 { font-size: 0.95rem; }
-h6 { font-size: 0.9rem; }
+h1 {
+  font-size: 2.8rem;
+  line-height: 1;
+  margin-top: 4rem;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  font-size: 2.2rem;
+  line-height: 1;
+  margin-top: 2.1rem;
+  margin-bottom: 1.4rem;
+}
+
+h3 {
+  font-size: 1.7rem;
+  line-height: 1;
+  margin-top: 2rem;
+  margin-bottom: 1.4rem;
+}
+
+h4 { font-size: 1.4rem; }
+h5 { font-size: 1.2rem; }
+h6 { font-size: 1.0rem; }
 
 p {
-  font-weight: 500;
-  margin: 0 0 1.2rem;
-  color: var(--text);
+  font-size: 1.5rem;
+  line-height: 2.1rem;
+  margin-top: 1.4rem;
+  margin-bottom: 1.4rem;
 }
 
 main > p:last-of-type {
   margin-bottom: 0.4rem;
 }
 
-main ul {
+main ul,
+main ol {
+  font-size: 1.5rem;
+  line-height: 2rem;
   padding-left: 1.2rem;
-  color: var(--text);
 }
 
 main li {
@@ -121,19 +147,20 @@ main li {
   margin: 0.5rem 0;
 }
 
+main ol li {
+  list-style-type: decimal;
+}
+
 blockquote {
   margin: 0.8rem 0 1.4rem;
-  padding-left: 0;
-  border-left: none;
-  font-size: 0.85rem;
+  font-size: 1.4rem;
   color: var(--muted);
 }
 
 .smallcaps {
+  font-feature-settings: "smcp";
   font-variant: small-caps;
-  font-size: 1.1em;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-size: 1.2em;
 }
 
 pre {
@@ -143,23 +170,30 @@ pre {
   overflow: auto;
 }
 
-code,
-pre code {
-  font-size: 9pt;
+code {
+  font-family: "Monaco", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 1.1rem;
+  line-height: 1.5;
 }
 
+pre > code {
+  font-size: 1.05rem;
+}
+
+
 a {
-  color: var(--accent);
-  text-decoration: none;
-  border-bottom: 1px solid rgba(31, 79, 107, 0.2);
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.1em;
+  text-decoration-thickness: 0.05em;
   transition:
     color 150ms ease,
-    border-color 150ms ease;
+    text-decoration-color 150ms ease;
 }
 
 a:hover,
 a:focus {
-  border-color: rgba(31, 79, 107, 0.5);
+  text-decoration-thickness: 0.1em;
 }
 
 /* Article listing on homepage */
@@ -171,27 +205,19 @@ a:focus {
   display: flex;
   align-items: baseline;
   gap: 1.5rem;
-  padding: 0.7rem 0;
+  padding: 1.1rem 0;
   border-bottom: 1px solid rgba(214, 210, 196, 0.45);
   text-decoration: none;
   color: var(--text);
-  transition:
-    color 150ms ease,
-    border-color 150ms ease;
+  transition: color 150ms ease;
 }
 
 .post-row:last-child {
   border-bottom: none;
 }
 
-.post-row:hover,
-.post-row:focus {
-  color: var(--accent);
-  border-color: rgba(214, 210, 196, 0.45);
-}
-
 .post-year {
-  font-size: 0.85rem;
+  font-size: 1.5rem;
   color: var(--accent-soft);
   letter-spacing: 0.03em;
   flex-shrink: 0;
@@ -199,13 +225,13 @@ a:focus {
 }
 
 .post-title {
-  font-size: 0.95rem;
+  font-size: 1.5rem;
   letter-spacing: 0.01em;
 }
 
 .post-duration {
   margin-left: auto;
-  font-size: 0.8rem;
+  font-size: 1.5rem;
   color: var(--accent-soft);
   letter-spacing: 0.02em;
   flex-shrink: 0;
@@ -214,7 +240,7 @@ a:focus {
 
 .post-row:hover .post-year,
 .post-row:hover .post-duration {
-  color: var(--accent);
+  color: var(--text);
 }
 
 @media (max-width: 900px) {
@@ -250,6 +276,9 @@ a:focus {
     min-width: auto;
   }
 
+}
+
+@media (max-width: 480px) {
   .post-duration {
     display: none;
   }

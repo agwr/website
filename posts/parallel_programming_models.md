@@ -10,7 +10,7 @@ In the early days of computing, improving performance was relatively straightfor
 
 However, this approach hit physical limits. As transistors got denser, chips ran into problems with heat dissipation and manufacturing complexity (e.g. the challenges of 3nm and smaller process nodes). Chip designers reached a point of diminishing returns: just adding more transistors or increasing the clock rate began to yield less improvement while generating more heat and being more expensive.
 
-The industry's response in the mid-2000s was to scale out horizontally by adding multiple processing cores on a single chip. Instead of one ultra-fast core, you got several moderately fast cores working in parallel. For example, an Apple M1 Pro has 8 or 10 cores, and high-end server processors like Intel's Granite Rapids Xeon processors can scale to well over 100 cores per socket. Each core can run tasks in parallel independently, so an application can theoretically run N times faster with N cores. Unfortunately, this is often not the case due to various factors (context switches, communication overhead, etc.).
+The industry's response in the mid-2000s was to scale out horizontally by adding multiple processing cores on a single chip. Instead of one ultra-fast core, you got several moderately fast cores working in parallel. For example, an Apple M1 Pro has 8 or 10 cores, and high-end server processors like Intel's Granite Rapids Xeon processors can scale to well over 100 cores per socket. Each core can run tasks in parallel independently, so an application can theoretically run $N$ times faster with $N$ cores. Unfortunately, this is often not the case due to various factors (context switches, communication overhead, etc.).
 
 ## Formations
 
@@ -18,7 +18,7 @@ Before diving deeper, it's useful to understand the types of parallelism found i
 
 1. Data Parallelism: performing the same operation on different pieces of data simultaneously (e.g. adding two arrays element-wise in parallel).
 2. Functional Parallelism: splitting a computation across multiple devices so different parts of the computation execute concurrently (e.g., allocating model experts to different devices).
-3. Pipeline Parallelism: breaking a computation into stages and executing those stages in a pipeline across multiple devices. While one stage is processing batch n, the next stage can process batch n - 1, and so on (e.g., training networks where layers are partitioned and pipelined across devices).
+3. Pipeline Parallelism: breaking a computation into stages and executing those stages in a pipeline across multiple devices. While one stage is processing batch $n$, the next stage can process batch $n - 1$, and so on (e.g., training networks where layers are partitioned and pipelined across devices).
 
 Modern high performance computing and deep learning systems often combine these forms. In this post, we'll mostly concentrate on data parallelism — making an algorithm execute faster by applying it in parallel on many data elements.
 
@@ -26,7 +26,7 @@ Modern high performance computing and deep learning systems often combine these 
 
 Adding more cores isn't the only way to speed up computation; we can also make each core itself do more work in parallel. Modern CPUs already exploit a lot of internal parallelism with techniques like instruction pipelining, out-of-order execution, and speculative execution. Pipelining, for instance, splits the execution of an instruction into stages (fetch, decode, execute, etc.) so that multiple instructions are in progress concurrently (like an assembly line).
 
-SIMD is a form of internal data parallelism at the instruction level. The CPU has special vector registers that are, say, 128, 256, or 512 bits wide, which can be viewed as containing multiple lanes (chunks) of smaller data elements. A single SIMD instruction operates on all lanes in one go. For example, with 128-bit NEON registers on an ARM processor, each register can hold four 32-bit integers (4 \* 32 = 128 bits). One SIMD add instruction can then add four pairs of integers at once (as opposed to four separate scalar add instructions).
+SIMD is a form of internal data parallelism at the instruction level. The CPU has special vector registers that are, say, 128, 256, or 512 bits wide, which can be viewed as containing multiple lanes (chunks) of smaller data elements. A single SIMD instruction operates on all lanes in one go. For example, with 128-bit NEON registers on an ARM processor, each register can hold four 32-bit integers. One SIMD add instruction can then add four pairs of integers at once (as opposed to four separate scalar add instructions).
 
 Under the hood, using SIMD means utilizing these wide registers and the corresponding instruction set extensions (SSE, AVX on x86, NEON on ARM, etc.). High-level languages usually expose SIMD through intrinsics — special macros that map directly to SIMD instructions. For instance, here's a simple example using ARM NEON intrinsics to add two vectors of integers:
 
@@ -134,7 +134,7 @@ std::thread t1([&] { for (size_t i = 0; i < 1'000'000; ++i) { ++foo.x; } });
 std::thread t2([&] { for (size_t i = 0; i < 1'000'000; ++i) { ++foo.y; } });
 ```
 
-Most hardware uses 64-byte cache lines, and C++17 provides the compile-time constant `std::hardware_destructive_interference_size` to query the cache line size on an architecture. With this change, `x` and `y` will be aligned on different cache lines, so each thread mostly stays in its own cache without constantly invalidating the other. A simple microbenchmark on my machine shows the difference: without padding, the two-thread test took ~34x10^6 ns; with padding, ~7.1x10^6 ns. That's about a 5x speedup gained solely by eliminating false sharing.
+Most hardware uses 64-byte cache lines, and C++17 provides the compile-time constant `std::hardware_destructive_interference_size` to query the cache line size on an architecture. With this change, `x` and `y` will be aligned on different cache lines, so each thread mostly stays in its own cache without constantly invalidating the other. A simple microbenchmark on my machine shows the difference: without padding, the two-thread test took ${\sim}34{\times}10^6$ ns; with padding, ${\sim}7.1{\times}10^6$ ns. That's about a $5{\times}$ speedup gained solely by eliminating false sharing.
 
 ## GPUs
 
@@ -173,7 +173,7 @@ mul_kernel[grid](data, data.numel(), BLOCK_SIZE=1024)
 
 Triton takes care of most of the boilerplate for launching GPU work. We specify that each program instance should process 1024 elements, and the grid function determines how many such instances are needed to cover the entire array. The call `pid = tl.program_id(axis=0)` gives the ID of the current program instance, and `tl.arange(0, BLOCK_SIZE)` produces a vector of 1024 lane offsets within that instance. These lanes behave like a small SIMD group: `tl.load` and `tl.store` operate over the whole vector in parallel, with masking to handle out-of-bounds indices. In effect, each Triton program instance handles a 1024-element chunk, and Triton launches as many program instances as required to process all 160,000 elements.
 
-Triton aims to be portable across GPU vendors (and potentially other accelerators), which is why it builds on MLIR to target multiple backends. The challenge is that a single portable compiler struggles to capture every low-level architectural detail, so vendor-tuned libraries like cuDNN or cuBLAS still hold an edge in achieving SOTA kernel performance. In practice, Triton often delivers near-CUDA performance: in recent Llama inference benchmarks, fully Triton-based models achieved around 78%–82% of equivalent CUDA kernel throughput on H100 and A100 GPUs. On core kernels (like matmul and attention), Triton implementations were typically 1.2-1.6x slower than the hand-tuned cuDNN and cuBLAS variants [4]. For many applications, this is a strong trade-off: you write far less low-level code while retaining most of the performance.
+Triton aims to be portable across GPU vendors (and potentially other accelerators), which is why it builds on MLIR to target multiple backends. The challenge is that a single portable compiler struggles to capture every low-level architectural detail, so vendor-tuned libraries like cuDNN or cuBLAS still hold an edge in achieving SOTA kernel performance. In practice, Triton often delivers near-CUDA performance: in recent Llama inference benchmarks, fully Triton-based models achieved around 78%–82% of equivalent CUDA kernel throughput on H100 and A100 GPUs. On core kernels (like matmul and attention), Triton implementations were typically $1.2$–$1.6{\times}$ slower than the hand-tuned cuDNN and cuBLAS variants [4]. For many applications, this is a strong trade-off: you write far less low-level code while retaining most of the performance.
 
 ## First Class
 
@@ -201,7 +201,7 @@ fn mul_mojo(mut data: List[Int32]):
         item[] *= 2
 ```
 
-In Mojo, `fn` declares a function, and the loop over `data` is auto-vectorized (for context, `item[]` performs an explicit dereference). Unlike Python, this yields a deterministic ~15x speedup by guaranteeing SIMD execution without relying on pseudo-indeterministic compiler heuristics or manual intrinsics.
+In Mojo, `fn` declares a function, and the loop over `data` is auto-vectorized (for context, `item[]` performs an explicit dereference). Unlike Python, this yields a deterministic ${\sim}15{\times}$ speedup by guaranteeing SIMD execution without relying on pseudo-indeterministic compiler heuristics or manual intrinsics.
 
 Mojo is still under active development (as of 2024, its GPU programming API is experimental and not yet publicly available). However, it's a promising direction. The goal is that programmers will be able to write portable kernels in Mojo, and the compiler will handle parallelizing and mapping to the hardware efficiently, just like it already does for CPU SIMD.
 
@@ -209,12 +209,12 @@ Another emerging project in this space is Bend, which explores parallelism-first
 
 ## Resources
 
-[0] Introduction to High Performance Scientific Computing — Victor Eijkhout
+0. *Introduction to High Performance Scientific Computing* by Victor Eijkhout
 
-[1] <https://docs.nvidia.com/cuda/cuda-c-programming-guide/>
+1. <https://docs.nvidia.com/cuda/cuda-c-programming-guide/>
 
-[2] <https://www.kapilsharma.dev/posts/deep-dive-into-triton-internals/>
+2. <https://www.kapilsharma.dev/posts/deep-dive-into-triton-internals/>
 
-[3] <https://docs.modular.com/mojo/manual/>
+3. <https://docs.modular.com/mojo/manual/>
 
-[4] <https://pytorch.org/blog/cuda-free-inference-for-llms/>
+4. <https://pytorch.org/blog/cuda-free-inference-for-llms/>
