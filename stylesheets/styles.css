@@ -1,32 +1,8 @@
-@font-face {
-  font-family: "et-book";
-  src: url("https://cdn.jsdelivr.net/gh/edwardtufte/et-book@gh-pages/et-book/et-book-roman-line-figures/et-book-roman-line-figures.woff") format("woff");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "et-book";
-  src: url("https://cdn.jsdelivr.net/gh/edwardtufte/et-book@gh-pages/et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.woff") format("woff");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "et-book";
-  src: url("https://cdn.jsdelivr.net/gh/edwardtufte/et-book@gh-pages/et-book/et-book-bold-line-figures/et-book-bold-line-figures.woff") format("woff");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
-  --bg: #fffefc;
-  --text: #111;
-  --muted: #555;
-  --accent-soft: #888;
+  --bg: #ffffff;
+  --text: #000000;
+  --muted: #888888;
+  --link: #001f5b;
 }
 
 * {
@@ -34,20 +10,26 @@
 }
 
 html {
-  font-size: 12.5px;
+  font-size: 12px;
 }
 
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: et-book, Palatino, "Palatino Linotype", "Palatino LT STD",
-    "Book Antiqua", Georgia, serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+em, i, cite, dfn, var, address {
+  font-style: normal;
 }
 
 .container {
   position: relative;
-  max-width: 52rem;
+  max-width: 40em;
   margin: 2rem auto;
   padding: 2rem 1rem 4rem;
 }
@@ -59,8 +41,7 @@ nav {
   text-align: right;
   width: 3.75rem;
   padding-top: 0.25rem;
-  letter-spacing: 0.05em;
-  color: var(--muted);
+  color: var(--text);
 }
 
 nav ul {
@@ -74,19 +55,17 @@ nav li {
 }
 
 nav a {
-  color: inherit;
+  color: var(--link);
   text-decoration: none;
-  padding-bottom: 0.1rem;
-  transition: color 150ms ease;
 }
 
 nav a:hover,
 nav a:focus {
-  color: var(--text);
+  text-decoration: underline;
 }
 
 main {
-  max-width: 44em;
+  max-width: 40em;
   margin: 0 auto;
 }
 
@@ -97,46 +76,18 @@ h4,
 h5,
 h6 {
   font-weight: 400;
-}
-
-h1 {
-  font-size: 2.88rem;
-  line-height: 1;
-  margin-top: 4rem;
-  margin-bottom: 1.5rem;
-}
-
-h2 {
-  font-size: 2.2rem;
-  line-height: 1;
-  margin-top: 2.1rem;
-  margin-bottom: 1.4rem;
-}
-
-h3 {
-  font-size: 1.7rem;
-  line-height: 1;
-  margin-top: 2rem;
-  margin-bottom: 1.4rem;
-}
-
-h4 {
-  font-size: 1.4rem;
-}
-
-h5 {
-  font-size: 1.2rem;
-}
-
-h6 {
-  font-size: 1.0rem;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 1.4rem 0;
 }
 
 p {
-  font-size: 1.5rem;
-  line-height: 2.1rem;
-  margin-top: 1.4rem;
-  margin-bottom: 1.4rem;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 1.4rem 0;
+  color: var(--text);
 }
 
 main>p:last-of-type {
@@ -145,14 +96,14 @@ main>p:last-of-type {
 
 main ul,
 main ol {
-  font-size: 1.5rem;
-  line-height: 2rem;
+  font-size: 12px;
+  line-height: 1.5;
   padding-left: 1.2rem;
 }
 
 main li {
   list-style-type: disc;
-  margin: 0.5rem 0;
+  margin: 0.3rem 0;
 }
 
 main ol li {
@@ -161,47 +112,45 @@ main ol li {
 
 blockquote {
   margin: 0.8rem 0 1.4rem;
-  font-size: 1.4rem;
+  font-size: 12px;
   color: var(--muted);
 }
 
-.smallcaps {
-  font-feature-settings: "smcp";
-  font-variant: small-caps;
-  font-size: 1.2em;
-}
-
 pre {
-  border-radius: 2px;
-  background-color: #f6f6f6;
-  padding: 14px;
-  overflow: auto;
+  background-color: rgb(250, 250, 250);
+  padding: 12px 14px;
+  overflow-x: auto;
+  margin: 1.4rem 0;
+  line-height: 1.5;
+  white-space: pre;
+  tab-size: 2;
 }
 
 code {
-  font-family: "Monaco", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  font-size: 1.1rem;
+  font-family: Menlo, monospace;
+  font-size: 11px;
   line-height: 1.5;
+  color: var(--text);
+  background: none;
+  padding: 0;
 }
 
-pre>code {
-  font-size: 1.05rem;
+pre > code {
+  font-size: 11px;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  display: block;
 }
-
 
 a {
-  color: inherit;
-  text-decoration: underline;
-  text-underline-offset: 0.1em;
-  text-decoration-thickness: 0.05em;
-  transition:
-    color 150ms ease,
-    text-decoration-color 150ms ease;
+  color: var(--link);
+  text-decoration: none;
 }
 
 a:hover,
 a:focus {
-  text-decoration-thickness: 0.1em;
+  text-decoration: underline;
 }
 
 /* Article listing on homepage */
@@ -213,47 +162,37 @@ a:focus {
   display: flex;
   align-items: baseline;
   gap: 1.5rem;
-  padding: 1.1rem 0;
-  border-bottom: 1px solid rgba(214, 210, 196, 0.45);
+  padding: 0.6rem 0;
   text-decoration: none;
   color: var(--text);
-  transition: color 150ms ease;
 }
 
-.post-row:last-child {
-  border-bottom: none;
+.post-row:hover .post-title {
+  text-decoration: underline;
 }
 
 .post-year {
-  font-size: 1.5rem;
-  color: var(--accent-soft);
-  letter-spacing: 0.03em;
+  font-size: 12px;
+  color: var(--muted);
   flex-shrink: 0;
   min-width: 2.5rem;
 }
 
 .post-title {
-  font-size: 1.5rem;
-  letter-spacing: 0.01em;
+  font-size: 12px;
+  color: var(--text);
 }
 
 .post-duration {
   margin-left: auto;
-  font-size: 1.5rem;
-  color: var(--accent-soft);
-  letter-spacing: 0.02em;
+  font-size: 12px;
+  color: var(--muted);
   flex-shrink: 0;
-  opacity: 0.7;
-}
-
-.post-row:hover .post-year,
-.post-row:hover .post-duration {
-  color: var(--text);
 }
 
 @media (max-width: 900px) {
   .container {
-    margin: 1rem;
+    margin: 1rem auto;
     padding: 1.5rem 1rem;
   }
 }
@@ -283,11 +222,5 @@ a:focus {
   .post-year {
     min-width: auto;
   }
-
 }
 
-@media (max-width: 480px) {
-  .post-duration {
-    display: none;
-  }
-}
