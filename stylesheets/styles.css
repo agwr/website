@@ -3,6 +3,17 @@
   --text: #000000;
   --muted: #888888;
   --link: #001f5b;
+  --code-bg: rgb(250, 250, 250);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14120b;
+    --text: #edecec;
+    --muted: #edecec99;
+    --link: #f54e00;
+    --code-bg: #1b1913;
+  }
 }
 
 * {
@@ -117,7 +128,7 @@ blockquote {
 }
 
 pre {
-  background-color: rgb(250, 250, 250);
+  background-color: var(--code-bg);
   padding: 12px 14px;
   overflow-x: auto;
   margin: 1.4rem 0;
