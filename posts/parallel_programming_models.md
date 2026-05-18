@@ -209,7 +209,7 @@ Another emerging project in this space is Bend, which explores parallelism-first
 
 ## Resources
 
-0. *Introduction to High Performance Scientific Computing* by Victor Eijkhout
+0. Introduction to High Performance Scientific Computing by Victor Eijkhout
 
 1. <https://docs.nvidia.com/cuda/cuda-c-programming-guide/>
 

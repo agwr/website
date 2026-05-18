@@ -4,29 +4,64 @@
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+      as="font"
+      crossorigin=""
+      href="stylesheets/et-book/et-book-roman-line-figures/et-book-roman-line-figures.woff"
+      rel="preload"
+      type="font/woff"
+    />
+    <link
+      as="font"
+      crossorigin=""
+      href="stylesheets/et-book/et-book-bold-line-figures/et-book-bold-line-figures.woff"
+      rel="preload"
+      type="font/woff"
+    />
     <link href="stylesheets/styles.css" rel="stylesheet" />
     <title>Ayush Gundawar</title>
   </head>
   <body>
-    <div class="container">
-      <main>
-        <h1>Ayush Gundawar</h1>
-        <p>
-          I am a technologist based in the beautiful city of Palo Alto,
-          California.
-        </p>
-        <div id="post-links">
-          <a class="post-row" href="posts/our_stolen_light.html"
-            ><span class="post-year">2026</span
-            ><span class="post-title">Our Stolen Light</span
-            ><span class="post-duration">2 min</span></a
-          ><a class="post-row" href="posts/parallel_programming_models.html"
-            ><span class="post-year">2024</span
-            ><span class="post-title">Parallel Programming Models</span
-            ><span class="post-duration">13 min</span></a
-          >
+    <header class="header">
+      <div class="container">
+        <a class="header-name-link" href="/">
+          <h1 class="header-name">Ayush Gundawar</h1>
+        </a>
+      </div>
+    </header>
+    <main class="page-main">
+      <article>
+        <div class="container">
+          <section>
+            <p>
+              I work on scaling neural networks. Previously, I worked on
+              high-frequency trading and autonomous humanoid robotics.
+            </p>
+            <p>
+              In my free time, I enjoy listening to witch house, reading science
+              fiction, and writing. The best way to reach me is
+              <a href="mailto:gundawar@gatech.edu">email</a> or carrier pigeon.
+            </p>
+          </section>
+          <section class="section-block">
+            <h3>Posts</h3>
+            <ul class="bullet-list" id="post-links">
+              <li>
+                <a class="bullet-list_link" href="posts/our_stolen_light.html"
+                  >Our Stolen Light</a
+                ><span class="bullet-list_meta">(2026, 2 min)</span>
+              </li>
+              <li>
+                <a
+                  class="bullet-list_link"
+                  href="posts/parallel_programming_models.html"
+                  >Parallel Programming Models</a
+                ><span class="bullet-list_meta">(2024, 13 min)</span>
+              </li>
+            </ul>
+          </section>
         </div>
-      </main>
-    </div>
+      </article>
+    </main>
   </body>
 </html>
