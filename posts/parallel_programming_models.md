@@ -134,7 +134,7 @@ std::thread t1([&] { for (size_t i = 0; i < 1'000'000; ++i) { ++foo.x; } });
 std::thread t2([&] { for (size_t i = 0; i < 1'000'000; ++i) { ++foo.y; } });
 ```
 
-Most hardware uses 64-byte cache lines, and C++17 provides the compile-time constant `std::hardware_destructive_interference_size` to query the cache line size on an architecture. With this change, `x` and `y` will be aligned on different cache lines, so each thread mostly stays in its own cache without constantly invalidating the other. A simple microbenchmark on my machine shows the difference: without padding, the two-thread test took ${\sim}34{\times}10^6$ ns; with padding, ${\sim}7.1{\times}10^6$ ns. That's about a $5{\times}$ speedup gained solely by eliminating false sharing.
+Most hardware uses 64-byte cache lines, and C++17 provides the compile-time constant `hardware_destructive_interference_size` to query the cache line size on an architecture. With this change, `x` and `y` will be aligned on different cache lines, so each thread mostly stays in its own cache without constantly invalidating the other. A simple microbenchmark on my machine shows the difference: without padding, the two-thread test took ${\sim}34{\times}10^6$ ns; with padding, ${\sim}7.1{\times}10^6$ ns. That's about a $5{\times}$ speedup gained solely by eliminating false sharing.
 
 ## GPUs
 

@@ -25,6 +25,14 @@
   font-display: block;
 }
 
+@font-face {
+  font-family: "Monaco";
+  src: url("monaco/Monaco.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --bg: #ffffff;
   --text: #1f1e1d;
@@ -202,7 +210,8 @@ blockquote p {
 }
 
 code {
-  font-family: Monaco, monospace;
+  font-family: "Monaco", Menlo, monospace;
+  font-size: 0.9em;
   color: var(--text);
 }
 
@@ -224,7 +233,6 @@ pre code {
   background: none;
   border: none;
   border-radius: 0;
-  font-size: 0.9em;
   box-sizing: border-box;
 }
 
@@ -289,5 +297,10 @@ dfn {
 
   h1 {
     font-size: 1.7em;
+  }
+
+  code,
+  pre code {
+    font-size: 0.75em;
   }
 }

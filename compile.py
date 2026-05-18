@@ -1,10 +1,23 @@
 import re
+import shutil
 import subprocess
 from datetime import datetime
 from pathlib import Path
 
 import markdown
 from bs4 import BeautifulSoup
+
+WRITING_DIR = Path("writing")
+
+
+def slugify(title: str) -> str:
+    """'Parallel Programming Models' -> 'parallel-programming-models'."""
+    slug = title.lower()
+    slug = re.sub(r"[^a-z0-9]+", "-", slug)
+    slug = slug.strip("-")
+    if not slug:
+        raise ValueError(f"empty slug derived from title {title!r}")
+    return slug
 
 _CODE_RE = re.compile(r"```.*?```|`[^`]*`", re.DOTALL)
 _BLOCK_MATH_RE = re.compile(r"\$\$.*?\$\$", re.DOTALL)
@@ -68,7 +81,8 @@ def render_post(md_path: Path) -> str:
     ></script>
 """
 
-    # Wrap in an HTML template
+    # Wrap in an HTML template. Use root-absolute paths so the template works
+    # regardless of how deeply nested the output file is under the site root.
     html_template = f"""
 <!DOCTYPE html>
 <html lang="en">
@@ -76,10 +90,12 @@ def render_post(md_path: Path) -> str:
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preload" as="font" type="font/woff" crossorigin
-      href="../stylesheets/et-book/et-book-roman-line-figures/et-book-roman-line-figures.woff" />
+      href="/stylesheets/et-book/et-book-roman-line-figures/et-book-roman-line-figures.woff" />
     <link rel="preload" as="font" type="font/woff" crossorigin
-      href="../stylesheets/et-book/et-book-bold-line-figures/et-book-bold-line-figures.woff" />
-    <link rel="stylesheet" href="../stylesheets/styles.css" />
+      href="/stylesheets/et-book/et-book-bold-line-figures/et-book-bold-line-figures.woff" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="/stylesheets/monaco/Monaco.woff2" />
+    <link rel="stylesheet" href="/stylesheets/styles.css" />
     {mathjax_block}
     <title>Ayush Gundawar</title>
   </head>
@@ -101,26 +117,41 @@ def render_post(md_path: Path) -> str:
 def main() -> None:
     md_files = sorted(Path("posts").glob("*.md"))
 
-    # Convert each MD to HTML and collect post metadata in one pass
+    # Wipe and rebuild the generated writing directory so renamed/removed posts
+    # don't leave stale HTML lying around.
+    if WRITING_DIR.exists():
+        shutil.rmtree(WRITING_DIR)
+    WRITING_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Convert each MD to writing/<slug>/index.html so the URL /writing/<slug>/
+    # works on any plain static server (python -m http.server, GitHub Pages,
+    # etc.) without needing extension-stripping middleware.
     post_data = []
+    seen_slugs: dict[str, Path] = {}
     for md_path in md_files:
         md_content = md_path.read_text(encoding="utf-8")
         lines = md_content.splitlines()
 
-        # Render post HTML
-        html_path = md_path.with_suffix(".html")
+        title = lines[0].lstrip("# ").strip()
+        date_str = lines[2].lstrip("> ").strip()
+        slug = slugify(title)
+
+        if slug in seen_slugs:
+            raise ValueError(
+                f"slug collision: {md_path} and {seen_slugs[slug]} both produce {slug!r}"
+            )
+        seen_slugs[slug] = md_path
+
+        out_dir = WRITING_DIR / slug
+        out_dir.mkdir(parents=True, exist_ok=True)
+        html_path = out_dir / "index.html"
         html_path.write_text(render_post(md_path), encoding="utf-8")
         subprocess.run(["prettier", "--write", str(html_path)], check=False)
 
-        # Collect metadata for index listing
-        title = lines[0].lstrip("# ").strip()
-        date_str = lines[2].lstrip("> ").strip()
-        post_data.append((title, date_str, reading_time(md_content), html_path.name))
+        post_data.append((title, date_str, reading_time(md_content), slug))
 
-    # Sort posts by date descending (newest first)
     post_data.sort(key=lambda x: datetime.strptime(x[1], "%B %d, %Y"), reverse=True)
 
-    # Update index.html post listing
     index_path = Path("index.html")
     soup = BeautifulSoup(index_path.read_text(encoding="utf-8"), "html.parser")
 
@@ -129,14 +160,14 @@ def main() -> None:
         raise RuntimeError("No element with id='post-links' found in index.html")
     post_links.clear()
 
-    for title, date_str, read_min, html_name in post_data:
+    for title, date_str, read_min, slug in post_data:
         year = str(datetime.strptime(date_str, "%B %d, %Y").year)
 
         li = soup.new_tag("li")
 
         link_tag = soup.new_tag(
             "a",
-            attrs={"href": f"posts/{html_name}", "class": "bullet-list_link"},
+            attrs={"href": f"/writing/{slug}/", "class": "bullet-list_link"},
         )
         link_tag.string = title
         li.append(link_tag)
