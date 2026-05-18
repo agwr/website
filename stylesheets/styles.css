@@ -1,7 +1,7 @@
 @font-face {
   font-family: "et-book";
   src: url("et-book/et-book-roman-line-figures/et-book-roman-line-figures.woff") format("woff"),
-       url("et-book/et-book-roman-line-figures/et-book-roman-line-figures.ttf") format("truetype");
+    url("et-book/et-book-roman-line-figures/et-book-roman-line-figures.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -10,7 +10,7 @@
 @font-face {
   font-family: "et-book";
   src: url("et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.woff") format("woff"),
-       url("et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.ttf") format("truetype");
+    url("et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.ttf") format("truetype");
   font-weight: normal;
   font-style: italic;
   font-display: block;
@@ -19,7 +19,7 @@
 @font-face {
   font-family: "et-book";
   src: url("et-book/et-book-bold-line-figures/et-book-bold-line-figures.woff") format("woff"),
-       url("et-book/et-book-bold-line-figures/et-book-bold-line-figures.ttf") format("truetype");
+    url("et-book/et-book-bold-line-figures/et-book-bold-line-figures.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
   font-display: block;
@@ -48,6 +48,7 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  overflow-x: clip;
 }
 
 body {
@@ -61,6 +62,7 @@ body {
   letter-spacing: 0;
   text-rendering: optimizeLegibility;
   font-size-adjust: from-font;
+  overflow-x: clip;
 }
 
 .container {
@@ -144,17 +146,17 @@ p {
   margin: 0 0 1em;
 }
 
-main > p + h2,
-main > p + h3,
-main > p + h4,
-main > ul + h2,
-main > ul + h3,
-main > ol + h2,
-main > ol + h3,
-main > pre + h2,
-main > pre + h3,
-main > blockquote + h2,
-main > blockquote + h3 {
+main>p+h2,
+main>p+h3,
+main>p+h4,
+main>ul+h2,
+main>ul+h3,
+main>ol+h2,
+main>ol+h3,
+main>pre+h2,
+main>pre+h3,
+main>blockquote+h2,
+main>blockquote+h3 {
   margin-top: 1em;
 }
 
@@ -201,13 +203,12 @@ blockquote p {
 
 code {
   font-family: Monaco, monospace;
-  font-size: 1em;
   color: var(--text);
 }
 
 pre {
   margin: 1.4em 0;
-  padding: 12px 14px;
+  padding: 0;
   background-color: var(--code-bg);
   border-radius: 4px;
   overflow-x: auto;
@@ -218,11 +219,13 @@ pre {
 
 pre code {
   display: block;
-  padding: 0;
+  min-width: max-content;
+  padding: 14px 18px;
   background: none;
   border: none;
   border-radius: 0;
   font-size: 0.9em;
+  box-sizing: border-box;
 }
 
 em,
@@ -249,12 +252,12 @@ dfn {
   gap: 0.8em;
 }
 
-.bullet-list > li {
+.bullet-list>li {
   margin: 0;
   padding-left: 1em;
 }
 
-.bullet-list > li::before {
+.bullet-list>li::before {
   content: "\2022";
   display: inline-block;
   margin-left: -0.7em;
@@ -283,6 +286,7 @@ dfn {
   .container {
     width: 95%;
   }
+
   h1 {
     font-size: 1.7em;
   }
