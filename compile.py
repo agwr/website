@@ -93,8 +93,6 @@ def render_post(md_path: Path) -> str:
       href="/stylesheets/et-book/et-book-roman-line-figures/et-book-roman-line-figures.woff" />
     <link rel="preload" as="font" type="font/woff" crossorigin
       href="/stylesheets/et-book/et-book-bold-line-figures/et-book-bold-line-figures.woff" />
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-      href="/stylesheets/monaco/Monaco.woff2" />
     <link rel="stylesheet" href="/stylesheets/styles.css" />
     {mathjax_block}
     <title>Ayush Gundawar</title>

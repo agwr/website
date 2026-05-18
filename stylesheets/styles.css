@@ -25,14 +25,6 @@
   font-display: block;
 }
 
-@font-face {
-  font-family: "Monaco";
-  src: url("monaco/Monaco.woff2") format("woff2");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
   --bg: #ffffff;
   --text: #1f1e1d;
@@ -56,6 +48,7 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   overflow-x: clip;
 }
 
@@ -69,8 +62,9 @@ body {
   line-height: 1.6;
   letter-spacing: 0;
   text-rendering: optimizeLegibility;
-  font-size-adjust: from-font;
   overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 .container {
@@ -210,8 +204,8 @@ blockquote p {
 }
 
 code {
-  font-family: "Monaco", Menlo, monospace;
-  font-size: 0.9em;
+  font-family: Menlo, monospace;
+  font-size: 0.75em;
   color: var(--text);
 }
 
@@ -228,7 +222,6 @@ pre {
 
 pre code {
   display: block;
-  min-width: max-content;
   padding: 14px 18px;
   background: none;
   border: none;
@@ -293,14 +286,5 @@ dfn {
 @media (max-width: 479px) {
   .container {
     width: 95%;
-  }
-
-  h1 {
-    font-size: 1.7em;
-  }
-
-  code,
-  pre code {
-    font-size: 0.75em;
   }
 }
