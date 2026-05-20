@@ -183,7 +183,7 @@ a:focus-visible {
 
 .footnote-ref {
   text-decoration: none;
-  padding-left: 0.05em;
+  padding: 0 0.1em;
   font-size: 0.75em;
 }
 

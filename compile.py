@@ -57,26 +57,42 @@ _FOOTNOTE_REF_RE = re.compile(r"\[(\d+)\]")
 
 
 def _add_footnotes(html_body: str) -> str:
-    """Turn [N] refs into superscript links and anchor the Resources list items."""
+    """Turn [N] refs into superscript links and anchor the References paragraphs."""
     soup = BeautifulSoup(html_body, "html.parser")
 
-    # --- anchor the Resources <ol> items ---
-    resources_heading = None
+    # --- anchor the References paragraphs (e.g. <p>[1] Some ref</p>) ---
+    ref_paragraphs: set[int] = set()
+    references_heading = None
     for h2 in soup.find_all("h2"):
-        if h2.get_text(strip=True) == "References":
-            resources_heading = h2
+        if h2.get_text(strip=True) == "Footnotes":
+            references_heading = h2
             break
 
-    if resources_heading:
-        ol = resources_heading.find_next_sibling("ol")
-        if ol:
-            for i, li in enumerate(ol.find_all("li", recursive=False), start=1):
-                li["id"] = f"ref-{i}"
+    if references_heading:
+        for sibling in references_heading.next_siblings:
+            if sibling.name == "p":
+                text = sibling.get_text(strip=True)
+                m = _FOOTNOTE_REF_RE.match(text)
+                if m:
+                    sibling["id"] = f"footnote-{m.group(1)}"
+                    ref_paragraphs.add(id(sibling))
+                    # Replace leading "[N] " with a plain superscript
+                    first_text = sibling.find(string=_FOOTNOTE_REF_RE)
+                    if first_text:
+                        rest = _FOOTNOTE_REF_RE.sub("", str(first_text), count=1).lstrip()
+                        sup = soup.new_tag("sup", attrs={"class": "footnote-ref"})
+                        sup.string = m.group(1)
+                        first_text.replace_with(sup)
+                        sup.insert_after(rest)
+            elif sibling.name and sibling.name.startswith("h"):
+                break
 
-    # --- convert [N] refs to superscript links (skip <pre>/<code>) ---
+    # --- convert [N] refs to superscript links (skip <pre>/<code> and ref paragraphs) ---
     skip_tags = {"pre", "code"}
     for text_node in list(soup.find_all(string=_FOOTNOTE_REF_RE)):
         if any(p.name in skip_tags for p in text_node.parents):
+            continue
+        if any(id(p) in ref_paragraphs for p in text_node.parents):
             continue
         parts = _FOOTNOTE_REF_RE.split(str(text_node))
         if len(parts) == 1:
@@ -92,7 +108,7 @@ def _add_footnotes(html_body: str) -> str:
                 sup = soup.new_tag("sup")
                 a = soup.new_tag(
                     "a",
-                    attrs={"href": f"#ref-{part}", "class": "footnote-ref"},
+                    attrs={"href": f"#footnote-{part}", "class": "footnote-ref"},
                 )
                 a.string = part
                 sup.append(a)

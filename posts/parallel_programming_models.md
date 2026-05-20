@@ -207,14 +207,14 @@ Mojo is still under active development (as of 2024, its GPU programming API is e
 
 Another emerging project in this space is Bend, which explores parallelism-first language design, though in a very different style than Mojo.
 
-## References
+## Footnotes
 
-1. Introduction to High Performance Scientific Computing by Victor Eijkhout
+[1] Introduction to High Performance Scientific Computing by Victor Eijkhout
 
-2. <https://docs.nvidia.com/cuda/cuda-c-programming-guide/>
+[2] <https://docs.nvidia.com/cuda/cuda-c-programming-guide/>
 
-3. <https://www.kapilsharma.dev/posts/deep-dive-into-triton-internals/>
+[3] <https://www.kapilsharma.dev/posts/deep-dive-into-triton-internals/>
 
-4. <https://docs.modular.com/mojo/manual/>
+[4] <https://docs.modular.com/mojo/manual/>
 
-5. <https://pytorch.org/blog/cuda-free-inference-for-llms/>
+[5] <https://pytorch.org/blog/cuda-free-inference-for-llms/>
