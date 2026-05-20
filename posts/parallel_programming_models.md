@@ -138,7 +138,7 @@ Most hardware uses 64-byte cache lines, and C++17 provides the compile-time cons
 
 ## GPUs
 
-While CPUs have a handful of cores optimized for sequential performance, GPUs have thousands of smaller cores designed for massive data parallelism. A GPU is essentially a compute fabric for running the same operation on a huge number of data elements in parallel. NVIDIA's CUDA framework (and similar models like OpenCL) let programmers launch a kernel (a function to execute on the GPU) across a grid of threads. The GPU hardware groups threads into blocks and warps for scheduling:
+While CPUs have a handful of cores optimized for sequential performance, GPUs have thousands of smaller cores designed for massive data parallelism. A GPU is essentially a compute fabric for running the same operation on a huge number of data elements in parallel. NVIDIA's CUDA [2] framework (and similar models like OpenCL) let programmers launch a kernel (a function to execute on the GPU) across a grid of threads. The GPU hardware groups threads into blocks and warps for scheduling:
 
 1. A block is a group of threads that execute on the same multiprocessor (SM in NVIDIA terms) and can cooperate via fast shared memory.
 2. A grid is the collection of all blocks launched for a given kernel invocation. You might launch, say, 1000 blocks of 256 threads each, for a total of 256,000 threads executing your kernel in parallel.
@@ -149,7 +149,7 @@ Another key difference is memory: the CPU (host) and GPU (device) have separate 
 
 ### Triton Kernels
 
-Writing CUDA C++ directly can be verbose and non-portable. Triton is a newer approach: it's a domain-specific language embedded in Python that aims to simplify GPU programming while remaining close to hardware. Triton provides a JIT compiler that lowers your Pythonic kernel code through multiple stages (Triton > Triton IR > MLIR > PTX or other backend). Under the hood it generates optimized GPU code comparable to hand-written CUDA, but lets you express kernels in a higher-level Python DSL that abstracts away much of the manual thread and memory management.
+Writing CUDA C++ directly can be verbose and non-portable. Triton is a newer approach: it's a domain-specific language embedded in Python that aims to simplify GPU programming while remaining close to hardware. Triton provides a JIT compiler that lowers your Pythonic kernel code through multiple stages (Triton > Triton IR > MLIR > PTX or other backend) [3]. Under the hood it generates optimized GPU code comparable to hand-written CUDA, but lets you express kernels in a higher-level Python DSL that abstracts away much of the manual thread and memory management.
 
 Below is a simple Triton kernel that multiplies every element of an array by 2 (mirroring our earlier CPU example). We define the kernel with a special `@triton.jit` decorator and launch it on the GPU:
 
@@ -173,13 +173,13 @@ mul_kernel[grid](data, data.numel(), BLOCK_SIZE=1024)
 
 Triton takes care of most of the boilerplate for launching GPU work. We specify that each program instance should process 1024 elements, and the grid function determines how many such instances are needed to cover the entire array. The call `pid = tl.program_id(axis=0)` gives the ID of the current program instance, and `tl.arange(0, BLOCK_SIZE)` produces a vector of 1024 lane offsets within that instance. These lanes behave like a small SIMD group: `tl.load` and `tl.store` operate over the whole vector in parallel, with masking to handle out-of-bounds indices. In effect, each Triton program instance handles a 1024-element chunk, and Triton launches as many program instances as required to process all 160,000 elements.
 
-Triton aims to be portable across GPU vendors (and potentially other accelerators), which is why it builds on MLIR to target multiple backends. The challenge is that a single portable compiler struggles to capture every low-level architectural detail, so vendor-tuned libraries like cuDNN or cuBLAS still hold an edge in achieving SOTA kernel performance. In practice, Triton often delivers near-CUDA performance: in recent Llama inference benchmarks, fully Triton-based models achieved around 78%–82% of equivalent CUDA kernel throughput on H100 and A100 GPUs. On core kernels (like matmul and attention), Triton implementations were typically $1.2$–$1.6{\times}$ slower than the hand-tuned cuDNN and cuBLAS variants [4]. For many applications, this is a strong trade-off: you write far less low-level code while retaining most of the performance.
+Triton aims to be portable across GPU vendors (and potentially other accelerators), which is why it builds on MLIR to target multiple backends. The challenge is that a single portable compiler struggles to capture every low-level architectural detail, so vendor-tuned libraries like cuDNN or cuBLAS still hold an edge in achieving SOTA kernel performance. In practice, Triton often delivers near-CUDA performance: in recent Llama inference benchmarks, fully Triton-based models achieved around 78%–82% of equivalent CUDA kernel throughput on H100 and A100 GPUs. On core kernels (like matmul and attention), Triton implementations were typically $1.2$–$1.6{\times}$ slower than the hand-tuned cuDNN and cuBLAS variants [5]. For many applications, this is a strong trade-off: you write far less low-level code while retaining most of the performance.
 
 ## First Class
 
 One observation about the state of parallel programming: we've been bolting parallelism onto fundamentally single-threaded languages. Threads, vector intrinsics, CUDA kernels — these are usually provided via libraries, extensions, or compiler tricks layered on top of a base language model that is sequential. As a result, developers have to constantly switch mental models between "normal" serial code and parallel constructs (which often feel foreign to the language). Wouldn't it be nice if parallelism were a native feature of the language itself?
 
-Mojo is a new language (in development) that attempts to do exactly that. Created by Chris Lattner (known for LLVM, Clang, Swift, and MLIR), Mojo is built with parallel programming as a first-class concern. It uses the MLIR infrastructure under the hood to enable portable, high-performance compilation to various targets (similar in spirit to what Triton does, but in the context of a full language). Mojo aims to unify concepts of CPU parallelism (threads, SIMD) and GPU programming in a single programming model. Some highlights of Mojo's design:
+Mojo [4] is a new language (in development) that attempts to do exactly that. Created by Chris Lattner (known for LLVM, Clang, Swift, and MLIR), Mojo is built with parallel programming as a first-class concern. It uses the MLIR infrastructure under the hood to enable portable, high-performance compilation to various targets (similar in spirit to what Triton does, but in the context of a full language). Mojo aims to unify concepts of CPU parallelism (threads, SIMD) and GPU programming in a single programming model. Some highlights of Mojo's design:
 
 1. It has built-in SIMD vector types and an API to explicitly vectorize code (for example, a vectorize function can apply a given operation in SIMD across a specified width).
 2. The type system differentiates between data in host memory and device (accelerator) memory, catching mistakes at compile time and easing portability.
@@ -207,14 +207,14 @@ Mojo is still under active development (as of 2024, its GPU programming API is e
 
 Another emerging project in this space is Bend, which explores parallelism-first language design, though in a very different style than Mojo.
 
-## Resources
+## References
 
-0. Introduction to High Performance Scientific Computing by Victor Eijkhout
+1. Introduction to High Performance Scientific Computing by Victor Eijkhout
 
-1. <https://docs.nvidia.com/cuda/cuda-c-programming-guide/>
+2. <https://docs.nvidia.com/cuda/cuda-c-programming-guide/>
 
-2. <https://www.kapilsharma.dev/posts/deep-dive-into-triton-internals/>
+3. <https://www.kapilsharma.dev/posts/deep-dive-into-triton-internals/>
 
-3. <https://docs.modular.com/mojo/manual/>
+4. <https://docs.modular.com/mojo/manual/>
 
-4. <https://pytorch.org/blog/cuda-free-inference-for-llms/>
+5. <https://pytorch.org/blog/cuda-free-inference-for-llms/>

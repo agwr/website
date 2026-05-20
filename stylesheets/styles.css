@@ -181,6 +181,16 @@ a:focus-visible {
   outline-offset: 2px;
 }
 
+.footnote-ref {
+  text-decoration: none;
+  padding-left: 0.05em;
+  font-size: 0.75em;
+}
+
+article ol a {
+  word-break: break-all;
+}
+
 ul,
 ol {
   margin: 0 0 1em;

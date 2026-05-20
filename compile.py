@@ -53,12 +53,62 @@ def has_latex(md_content: str) -> bool:
     )
 
 
+_FOOTNOTE_REF_RE = re.compile(r"\[(\d+)\]")
+
+
+def _add_footnotes(html_body: str) -> str:
+    """Turn [N] refs into superscript links and anchor the Resources list items."""
+    soup = BeautifulSoup(html_body, "html.parser")
+
+    # --- anchor the Resources <ol> items ---
+    resources_heading = None
+    for h2 in soup.find_all("h2"):
+        if h2.get_text(strip=True) == "References":
+            resources_heading = h2
+            break
+
+    if resources_heading:
+        ol = resources_heading.find_next_sibling("ol")
+        if ol:
+            for i, li in enumerate(ol.find_all("li", recursive=False), start=1):
+                li["id"] = f"ref-{i}"
+
+    # --- convert [N] refs to superscript links (skip <pre>/<code>) ---
+    skip_tags = {"pre", "code"}
+    for text_node in list(soup.find_all(string=_FOOTNOTE_REF_RE)):
+        if any(p.name in skip_tags for p in text_node.parents):
+            continue
+        parts = _FOOTNOTE_REF_RE.split(str(text_node))
+        if len(parts) == 1:
+            continue
+        replacement = []
+        for j, part in enumerate(parts):
+            if j % 2 == 0:
+                if j + 1 < len(parts):
+                    part = part.rstrip()
+                if part:
+                    replacement.append(part)
+            else:
+                sup = soup.new_tag("sup")
+                a = soup.new_tag(
+                    "a",
+                    attrs={"href": f"#ref-{part}", "class": "footnote-ref"},
+                )
+                a.string = part
+                sup.append(a)
+                replacement.append(sup)
+        text_node.replace_with(*replacement)
+
+    return str(soup)
+
+
 def render_post(md_path: Path) -> str:
     """Convert raw markdown post content to styled HTML and return as a string."""
 
     md_content = md_path.read_text(encoding="utf-8")
 
     html_body = markdown.markdown(md_content, extensions=["fenced_code"])
+    html_body = _add_footnotes(html_body)
 
     mathjax_block = ""
     if has_latex(md_content):
