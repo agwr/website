@@ -292,6 +292,20 @@ dfn {
   color: var(--text);
 }
 
+/* Overlay scrollbar (OverlayScrollbars) styled to mimic the native macOS
+   scrollbar: thin, rounded, translucent, and floating over the content so it
+   never changes the layout width and the centered container stays put. */
+.os-scrollbar.os-theme-native {
+  --os-size: 11px;
+  --os-padding-perpendicular: 2px;
+  --os-padding-axis: 2px;
+  --os-handle-border-radius: 8px;
+  --os-handle-bg: rgba(31, 30, 29, 0.32);
+  --os-handle-bg-hover: rgba(31, 30, 29, 0.48);
+  --os-handle-bg-active: rgba(31, 30, 29, 0.6);
+  --os-handle-min-size: 30px;
+}
+
 @media (max-width: 991px) {
   .container {
     max-width: none;

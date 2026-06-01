@@ -160,6 +160,8 @@ def render_post(md_path: Path) -> str:
     <link rel="preload" as="font" type="font/woff" crossorigin
       href="/stylesheets/et-book/et-book-bold-line-figures/et-book-bold-line-figures.woff" />
     <link rel="stylesheet" href="/stylesheets/styles.css" />
+    <link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/styles/overlayscrollbars.min.css" />
     {mathjax_block}
     <title>Ayush Gundawar</title>
   </head>
@@ -171,6 +173,9 @@ def render_post(md_path: Path) -> str:
         </div>
       </article>
     </main>
+    <script
+      src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/browser/overlayscrollbars.browser.es6.min.js"></script>
+    <script src="/stylesheets/overlay-scrollbar.js"></script>
   </body>
 </html>
 """
