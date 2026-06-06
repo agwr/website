@@ -148,6 +148,7 @@ h4 {
 
 p {
   margin: 0 0 1em;
+  line-height: 1.43;
 }
 
 main>p+h2,
@@ -268,7 +269,7 @@ dfn {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.8em;
+  gap: 0.6em;
 }
 
 .bullet-list>li {
