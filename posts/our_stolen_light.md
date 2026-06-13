@@ -10,6 +10,6 @@ We must embrace acceleration. We must recognize that we are Prometheus, forever 
 
 Yet fire cannot be left to guide itself. It must be kindled toward humanity’s prosperity, or it will burn wild.
 
-It is a grave mistake to assume that powerful technology will inherit the virtues of the world that made it. It is on humanity to carve our virtues into technology: our strength in suffering, our drive to create, our need to connect. Only then is the punishment more than torture — a burden we bear because we refuse to abandon those still shivering in the dark.
+It is a grave mistake to assume that powerful technology will inherit the virtues of the world that made it. It is on humanity to carve them into its foundations: our strength in suffering, our drive to create, our need to connect. Only then is the punishment more than torture — a burden we bear because we refuse to abandon those still shivering in the dark.
 
 We will all be chained to the rock. The only question is whether we stole fire that warms or fire that consumes.
