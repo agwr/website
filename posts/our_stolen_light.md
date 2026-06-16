@@ -10,6 +10,6 @@ We must embrace acceleration. We must recognize that we are Prometheus, forever 
 
 Yet fire cannot be left to guide itself. It must be kindled toward humanity’s prosperity, or it will burn wild.
 
-It is a grave mistake to assume that powerful technology will inherit the virtues of the world that made it. It is on humanity to carve them into its foundations: our strength in suffering, our drive to create, our need to connect. Only in humanity's hands will the torch light the path forward.
+It is a grave mistake to assume that powerful technology will inherit the virtues of the world that made it. It is on humanity to carve them into its foundations: our strength in suffering, our drive to create, our need to connect. Only in man's hands will the torch light the path forward; unguided, it sets the world ablaze.
 
 We will all be chained to the rock. The only question is whether we stole fire that warms or fire that consumes.
