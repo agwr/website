@@ -8,7 +8,7 @@ We pretend the choice was ever ours to make. We speak of accelerating technology
 
 We must embrace acceleration. We must recognize that we are Prometheus, forever chained to the rock of our existence. Every grandmother video-calling her grandson across continents, every child whose leukemia enters remission, every farmer reaping abundance from exhausted soil — each victory becomes a commitment demanding we keep stealing fire for humanity, because the alternative is watching the people we love freeze in the dark.
 
-Yet fire cannot be left to guide itself. It must be kindled toward humanity’s prosperity, or it will burn wild.
+Yet fire *cannot* be left to guide itself.
 
 It is a grave mistake to assume that powerful technology will inherit the virtues of the world that made it. It is on humanity to carve them into its foundations: our strength in suffering, our drive to create, our need to connect. Only in man's hands will the torch light the path forward; unguided, it sets the world ablaze.
 
