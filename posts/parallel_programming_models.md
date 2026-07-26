@@ -10,7 +10,7 @@ In the early days of computing, improving performance was relatively straightfor
 
 However, this approach hit physical limits. As transistors got denser, chips ran into problems with heat dissipation and manufacturing complexity (e.g. the challenges of 3nm and smaller process nodes). Chip designers reached a point of diminishing returns: just adding more transistors or increasing the clock rate began to yield less improvement while generating more heat and being more expensive.
 
-The industry's response in the mid-2000s was to scale out horizontally by adding multiple processing cores on a single chip. Instead of one ultra-fast core, you got several moderately fast cores working in parallel. For example, an Apple M1 Pro has 8 or 10 cores, and high-end server processors like Intel's Granite Rapids Xeon processors can scale to well over 100 cores per socket. Each core can run tasks in parallel independently, so an application can theoretically run $N$ times faster with $N$ cores. Unfortunately, this is often not the case due to various factors (context switches, communication overhead, etc.).
+The industry's response in the mid-2000s was to scale out horizontally by adding multiple processing cores on a single chip. Instead of one ultra-fast core, you got several moderately fast cores working in parallel. For example, an Apple M1 Pro has 8 or 10 cores, and high-end server processors like Intel's Granite Rapids Xeon processors can scale to well over 100 cores per socket. Each core can run tasks in parallel independently, so an application can theoretically run $N$ times faster with $N$ cores. Unfortunately, this is often not the case due to various practical limitations (context switches, communication overhead, etc.).
 
 ## Formations
 

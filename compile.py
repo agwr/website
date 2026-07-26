@@ -123,7 +123,9 @@ def render_post(md_path: Path) -> str:
 
     md_content = md_path.read_text(encoding="utf-8")
 
-    html_body = markdown.markdown(md_content, extensions=["fenced_code"])
+    # The toc extension assigns stable, URL-friendly IDs to headings without
+    # rendering a table of contents, enabling links such as "#threading".
+    html_body = markdown.markdown(md_content, extensions=["fenced_code", "toc"])
     html_body = _add_footnotes(html_body)
 
     mathjax_block = ""
@@ -242,7 +244,11 @@ def main() -> None:
         li.append(link_tag)
 
         meta_span = soup.new_tag("span", attrs={"class": "bullet-list_meta"})
-        meta_span.string = f"({year}, {read_min} min)"
+        meta_span.append(f"({year}")
+        time_span = soup.new_tag("span", attrs={"class": "bullet-list_time"})
+        time_span.string = f", {read_min} min"
+        meta_span.append(time_span)
+        meta_span.append(")")
         li.append(meta_span)
 
         post_links.append(li)
