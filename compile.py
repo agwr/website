@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 import markdown
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 WRITING_DIR = Path("writing")
 
@@ -57,42 +57,61 @@ _FOOTNOTE_REF_RE = re.compile(r"\[(\d+)\]")
 
 
 def _add_footnotes(html_body: str) -> str:
-    """Turn [N] refs into superscript links and anchor the References paragraphs."""
+    """Turn inline [N] refs into superscript links and number the Footnotes entries."""
     soup = BeautifulSoup(html_body, "html.parser")
 
-    # --- anchor the References paragraphs (e.g. <p>[1] Some ref</p>) ---
-    ref_paragraphs: set[int] = set()
+    # --- gather the footnote paragraphs (e.g. <p>[1] Some ref</p>) ---
+    ref_entries: set[int] = set()
     references_heading = None
     for h2 in soup.find_all("h2"):
         if h2.get_text(strip=True) == "Footnotes":
             references_heading = h2
             break
 
+    entries: list[tuple[str, Tag]] = []
     if references_heading:
         for sibling in references_heading.next_siblings:
             if sibling.name == "p":
-                text = sibling.get_text(strip=True)
-                m = _FOOTNOTE_REF_RE.match(text)
+                m = _FOOTNOTE_REF_RE.match(sibling.get_text(strip=True))
                 if m:
-                    sibling["id"] = f"footnote-{m.group(1)}"
-                    ref_paragraphs.add(id(sibling))
-                    # Replace leading "[N] " with a plain superscript
-                    first_text = sibling.find(string=_FOOTNOTE_REF_RE)
-                    if first_text:
-                        rest = _FOOTNOTE_REF_RE.sub("", str(first_text), count=1).lstrip()
-                        sup = soup.new_tag("sup", attrs={"class": "footnote-ref"})
-                        sup.string = m.group(1)
-                        first_text.replace_with(sup)
-                        sup.insert_after(rest)
+                    entries.append((m.group(1), sibling))
             elif sibling.name and sibling.name.startswith("h"):
                 break
+
+    # --- fold them into a single ordered list ---
+    if entries:
+        ordered_list = soup.new_tag("ol")
+
+        for position, (number, paragraph) in enumerate(entries, start=1):
+            li = soup.new_tag("li")
+            li["id"] = f"footnote-{number}"
+            # The marker has to match the inline [N] refs, which a post is free
+            # to skip or reorder, so pin it whenever it would drift.
+            if int(number) != position:
+                li["value"] = number
+
+            # Drop the literal "[N] " now that the list renders the marker.
+            first_text = paragraph.find(string=_FOOTNOTE_REF_RE)
+            if first_text:
+                stripped = _FOOTNOTE_REF_RE.sub("", str(first_text), count=1).lstrip()
+                first_text.replace_with(stripped)
+
+            for child in list(paragraph.contents):
+                li.append(child.extract())
+
+            ordered_list.append(li)
+            ref_entries.add(id(li))
+
+        references_heading.insert_after(ordered_list)
+        for _, paragraph in entries:
+            paragraph.decompose()
 
     # --- convert [N] refs to superscript links (skip <pre>/<code> and ref paragraphs) ---
     skip_tags = {"pre", "code"}
     for text_node in list(soup.find_all(string=_FOOTNOTE_REF_RE)):
         if any(p.name in skip_tags for p in text_node.parents):
             continue
-        if any(id(p) in ref_paragraphs for p in text_node.parents):
+        if any(id(p) in ref_entries for p in text_node.parents):
             continue
         parts = _FOOTNOTE_REF_RE.split(str(text_node))
         if len(parts) == 1:
@@ -106,14 +125,23 @@ def _add_footnotes(html_body: str) -> str:
                     replacement.append(part)
             else:
                 sup = soup.new_tag("sup")
-                a = soup.new_tag(
-                    "a",
-                    attrs={"href": f"#footnote-{part}", "class": "footnote-ref"},
-                )
+                a = soup.new_tag("a", attrs={"href": f"#footnote-{part}"})
                 a.string = part
                 sup.append(a)
                 replacement.append(sup)
         text_node.replace_with(*replacement)
+
+    return str(soup)
+
+
+def _add_title_rule(html_body: str) -> str:
+    """Insert an <hr> directly under the post title."""
+    soup = BeautifulSoup(html_body, "html.parser")
+
+    h1 = soup.find("h1")
+    if h1 is None:
+        return html_body
+    h1.insert_after(soup.new_tag("hr"))
 
     return str(soup)
 
@@ -127,6 +155,7 @@ def render_post(md_path: Path) -> str:
     # rendering a table of contents, enabling links such as "#threading".
     html_body = markdown.markdown(md_content, extensions=["fenced_code", "toc"])
     html_body = _add_footnotes(html_body)
+    html_body = _add_title_rule(html_body)
 
     mathjax_block = ""
     if has_latex(md_content):
@@ -157,27 +186,12 @@ def render_post(md_path: Path) -> str:
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preload" as="font" type="font/woff" crossorigin
-      href="/stylesheets/et-book/et-book-roman-line-figures/et-book-roman-line-figures.woff" />
-    <link rel="preload" as="font" type="font/woff" crossorigin
-      href="/stylesheets/et-book/et-book-bold-line-figures/et-book-bold-line-figures.woff" />
     <link rel="stylesheet" href="/stylesheets/styles.css" />
-    <link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/styles/overlayscrollbars.min.css" />
     {mathjax_block}
     <title>Ayush Gundawar</title>
   </head>
-  <body class="post-page">
-    <main class="page-main">
-      <article>
-        <div class="container">
-          {html_body}
-        </div>
-      </article>
-    </main>
-    <script
-      src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/browser/overlayscrollbars.browser.es6.min.js"></script>
-    <script src="/stylesheets/overlay-scrollbar.js"></script>
+  <body>
+    {html_body}
   </body>
 </html>
 """
@@ -236,20 +250,10 @@ def main() -> None:
 
         li = soup.new_tag("li")
 
-        link_tag = soup.new_tag(
-            "a",
-            attrs={"href": f"/writing/{slug}/", "class": "bullet-list_link"},
-        )
+        link_tag = soup.new_tag("a", attrs={"href": f"/writing/{slug}/"})
         link_tag.string = title
         li.append(link_tag)
-
-        meta_span = soup.new_tag("span", attrs={"class": "bullet-list_meta"})
-        meta_span.append(f"({year}")
-        time_span = soup.new_tag("span", attrs={"class": "bullet-list_time"})
-        time_span.string = f", {read_min} min"
-        meta_span.append(time_span)
-        meta_span.append(")")
-        li.append(meta_span)
+        li.append(f" ({year}, {read_min} min)")
 
         post_links.append(li)
 
