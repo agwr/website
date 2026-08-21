@@ -10,6 +10,7 @@ blockquote {
   margin-left: 0;
 }
 
-pre {
+pre,
+mjx-container {
   overflow-x: auto;
 }

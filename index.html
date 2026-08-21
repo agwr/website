@@ -6,6 +6,18 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <link href="stylesheets/styles.css" rel="stylesheet" />
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [["$", "$"], ["\\(", "\\)"]],
+        displayMath: [["$$", "$$"], ["\\[", "\\]"]],
+      },
+      options: {
+        skipHtmlTags: ["script", "style", "noscript", "textarea", "pre", "code"],
+      },
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <title>Ayush Gundawar</title>
 </head>
 
@@ -36,6 +48,15 @@
       (2024, 13 min)
     </li>
   </ul>
+  <h3>Brain Teaser</h3>
+  <p>Prove:</p>
+  <p>
+    \[
+      \min_b \operatorname{Var}_{a \sim \pi_\theta}
+      \big[ (r(a) - b)\, \nabla_\theta \log \pi_\theta(a) \big] = 2
+      \;\text{ where }\; \pi_\theta = \mathcal{N}(\theta, \sigma^2), \; r(a) = a
+    \]
+  </p>
 </body>
 
 </html>
