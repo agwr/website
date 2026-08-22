@@ -9,6 +9,14 @@ from bs4 import BeautifulSoup, Tag
 
 WRITING_DIR = Path("writing")
 
+# Prettier consults .gitignore unless an explicit ignore path is given, which
+# would skip every generated file under the gitignored writing/ directory.
+PRETTIER = ["prettier", "--ignore-path", ".prettierignore", "--write"]
+
+
+def format_html(path: Path) -> None:
+    subprocess.run([*PRETTIER, str(path)], check=False)
+
 
 def slugify(title: str) -> str:
     """'Parallel Programming Models' -> 'parallel-programming-models'."""
@@ -208,9 +216,9 @@ def main() -> None:
         shutil.rmtree(WRITING_DIR)
     WRITING_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Convert each MD to writing/<slug>/index.html so the URL /writing/<slug>/
-    # works on any plain static server (python -m http.server, GitHub Pages,
-    # etc.) without needing extension-stripping middleware.
+    # Convert each MD to writing/<slug>.html. The .html is stripped from the URL
+    # by the server, so keep every href extensionless (see README for the local
+    # preview command that mirrors what GitHub Pages does).
     post_data = []
     seen_slugs: dict[str, Path] = {}
     for md_path in md_files:
@@ -227,11 +235,9 @@ def main() -> None:
             )
         seen_slugs[slug] = md_path
 
-        out_dir = WRITING_DIR / slug
-        out_dir.mkdir(parents=True, exist_ok=True)
-        html_path = out_dir / "index.html"
+        html_path = WRITING_DIR / f"{slug}.html"
         html_path.write_text(render_post(md_path), encoding="utf-8")
-        subprocess.run(["prettier", "--write", str(html_path)], check=False)
+        format_html(html_path)
 
         post_data.append((title, date_str, reading_time(md_content), slug))
 
@@ -250,7 +256,7 @@ def main() -> None:
 
         li = soup.new_tag("li")
 
-        link_tag = soup.new_tag("a", attrs={"href": f"/writing/{slug}/"})
+        link_tag = soup.new_tag("a", attrs={"href": f"/writing/{slug}"})
         link_tag.string = title
         li.append(link_tag)
         li.append(f" ({year}, {read_min} min)")
@@ -258,7 +264,7 @@ def main() -> None:
         post_links.append(li)
 
     index_path.write_text(str(soup), encoding="utf-8")
-    subprocess.run(["prettier", "--write", "index.html"], check=False)
+    format_html(index_path)
 
 
 if __name__ == "__main__":

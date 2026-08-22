@@ -48,6 +48,8 @@ jobs:
             --exclude '.venv/' \
             --exclude '_site/' \
             --exclude 'compile.py' \
+            --exclude '.prettierignore' \
+            --exclude 'README.md' \
             --exclude 'pyproject.toml' \
             --exclude 'uv.lock' \
             --exclude 'posts/*.md' \
