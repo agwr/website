@@ -40,7 +40,13 @@
     <script type="speculationrules">
       {
         "prerender": [
-          { "where": { "href_matches": "/writing/*" }, "eagerness": "moderate" }
+          { "where": { "href_matches": "/*" }, "eagerness": "moderate" }
+        ],
+        "prefetch": [
+          {
+            "where": { "not": { "href_matches": "/*" } },
+            "eagerness": "moderate"
+          }
         ]
       }
     </script>

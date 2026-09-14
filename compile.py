@@ -13,6 +13,12 @@ WRITING_DIR = Path("writing")
 INDEX = Path("index.html")
 PAGES = [INDEX, Path("internet.html")]
 CSS = Path("stylesheets/styles.css").read_text(encoding="utf-8")
+SPECULATION_RULES = json.dumps(
+    {
+        "prerender": [{"where": {"href_matches": "/*"}, "eagerness": "moderate"}],
+        "prefetch": [{"where": {"not": {"href_matches": "/*"}}, "eagerness": "moderate"}],
+    }
+)
 
 _CODE_RE = re.compile(r"```.*?```|`[^`]*`", re.DOTALL)
 _MARKDOWN_SYNTAX_RE = re.compile(
@@ -27,6 +33,7 @@ TEMPLATE = """<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>{css}</style>
     {style}
+    <script type="speculationrules">{rules}</script>
     <title>Ayush Gundawar</title>
   </head>
   <body>
@@ -95,7 +102,7 @@ def render_post(md: str) -> str:
     soup.h1.insert_after(soup.new_tag("hr"))
     # Typeset math at build time so the page never reflows while MathJax loads.
     typeset = subprocess.check_output(["node", "render_math.js"], input=str(soup), text=True)
-    html = TEMPLATE.format(css=CSS, **json.loads(typeset))
+    html = TEMPLATE.format(css=CSS, rules=SPECULATION_RULES, **json.loads(typeset))
     return minify_html.minify(html, minify_css=True)
 
 
@@ -116,6 +123,7 @@ def main() -> None:
     pages = {p: BeautifulSoup(p.read_text(encoding="utf-8"), "html.parser") for p in PAGES}
     for soup in pages.values():
         soup.find("style", id="css").string = CSS
+        soup.find("script", type="speculationrules").string = SPECULATION_RULES
 
     index = pages[INDEX]
     links = index.find(id="post-links")

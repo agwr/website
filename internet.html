@@ -37,6 +37,19 @@
       }
     </style>
     <title>Ayush Gundawar</title>
+    <script type="speculationrules">
+      {
+        "prerender": [
+          { "where": { "href_matches": "/*" }, "eagerness": "moderate" }
+        ],
+        "prefetch": [
+          {
+            "where": { "not": { "href_matches": "/*" } },
+            "eagerness": "moderate"
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <h1>Internet Essays</h1>
@@ -218,6 +231,12 @@
         <em>Hazy Research.</em>
         <a href="https://hazyresearch.stanford.edu/blog/2024-05-12-tk"
           >GPUs Go Brrr</a
+        >
+      </li>
+      <li>
+        <em>Dario Amodei et al.</em>
+        <a href="https://arxiv.org/abs/1606.06565"
+          >Concrete Problems in AI Safety</a
         >
       </li>
     </ul>
