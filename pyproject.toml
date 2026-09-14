@@ -1,15 +1,9 @@
 [project]
 name = "website"
 version = "0.1.0"
-description = "Generate tailored HTML from raw markdown post data"
 requires-python = ">=3.10"
 dependencies = [
     "beautifulsoup4>=4.12.3",
     "markdown>=3.7",
-    "pygments>=2.18.0",
-]
-
-[dependency-groups]
-dev = [
-    "prettier>=0.0.7",
+    "minify-html>=0.18.1",
 ]

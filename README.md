@@ -1,8 +1,12 @@
 ## Website
 
-Build (renders `posts/*.md` into `writing/`, needs `prettier` on PATH):
+Build (renders `posts/*.md` into minified HTML under `writing/`; needs
+`prettier` on PATH to format the committed pages). Math is typeset to SVG at
+build time by MathJax via `render_math.js`, and `stylesheets/styles.css` is
+inlined into every page, so edit the CSS there and rebuild:
 
 ```sh
+npm install
 uv run compile.py
 ```
 

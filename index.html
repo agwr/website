@@ -4,8 +4,46 @@
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <link href="/stylesheets/styles.css" rel="stylesheet" />
+    <style id="css">
+      html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+
+      body {
+        margin: 1.5rem;
+        max-width: 36rem;
+        overflow-wrap: break-word;
+      }
+
+      /* The date line under each post title is markdown blockquote syntax; drop the
+   default indent so it reads as a subtitle rather than a pull quote. */
+      blockquote {
+        margin-left: 0;
+      }
+
+      pre,
+      mjx-container {
+        overflow-x: auto;
+      }
+
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+
+      a:visited {
+        color: LinkText;
+      }
+    </style>
     <title>Ayush Gundawar</title>
+    <script type="speculationrules">
+      {
+        "prerender": [
+          { "where": { "href_matches": "/writing/*" }, "eagerness": "moderate" }
+        ]
+      }
+    </script>
   </head>
   <body>
     <h1>Ayush Gundawar</h1>
@@ -37,14 +75,5 @@
         (2024, 13 min)
       </li>
     </ul>
-    <h3>Brain Teaser</h3>
-    <p>
-      <img
-        alt="Prove: min over b of Var[(r(a) - b) grad_theta log pi_theta(a)] = 2, where pi_theta = N(theta, sigma^2) and r(a) = a"
-        height="381"
-        src="/images/brain-teaser.png"
-        width="3405"
-      />
-    </p>
   </body>
 </html>

@@ -10,53 +10,18 @@ jobs:
     permissions:
       contents: read
       pages: write
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v7
+      - run: npm install --global prettier@3
+      - run: npm install
+      - run: uv run compile.py
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.10"
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "20"
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-
-      - name: Install Prettier
-        run: npm install --global prettier@3
-
-      - name: Build site
-        run: uv run compile.py
-
-      - name: Configure GitHub Pages
-        if: github.ref_name == github.event.repository.default_branch
+      - if: github.ref_name == github.event.repository.default_branch
         uses: actions/configure-pages@v5
-
-      - name: Prepare Pages artifact
-        if: github.ref_name == github.event.repository.default_branch
-        run: |
-          mkdir -p _site
-          rsync -av \
-            --exclude '.git/' \
-            --exclude '.github/' \
-            --exclude '.venv/' \
-            --exclude '_site/' \
-            --exclude 'compile.py' \
-            --exclude '.prettierignore' \
-            --exclude 'README.md' \
-            --exclude 'pyproject.toml' \
-            --exclude 'uv.lock' \
-            --exclude 'posts/*.md' \
-            ./ _site/
-
-      - name: Upload Pages artifact
-        if: github.ref_name == github.event.repository.default_branch
+      - if: github.ref_name == github.event.repository.default_branch
+        run: mkdir _site && cp -r CNAME index.html internet.html writing _site
+      - if: github.ref_name == github.event.repository.default_branch
         uses: actions/upload-pages-artifact@v4
         with:
           path: _site
@@ -67,18 +32,13 @@ jobs:
     runs-on: ubuntu-latest
     concurrency:
       group: pages
-      cancel-in-progress: false
-
     permissions:
       contents: read
       pages: write
       id-token: write
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - id: deployment
         uses: actions/deploy-pages@v4
