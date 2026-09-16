@@ -9,117 +9,102 @@ import markdown
 import minify_html
 from bs4 import BeautifulSoup
 
-WRITING_DIR = Path("writing")
-INDEX = Path("index.html")
-PAGES = [INDEX, Path("internet.html")]
-CSS = Path("stylesheets/styles.css").read_text(encoding="utf-8")
-SPECULATION_RULES = json.dumps(
-    {
-        "prerender": [{"where": {"href_matches": "/*"}, "eagerness": "moderate"}],
-        "prefetch": [{"where": {"not": {"href_matches": "/*"}}, "eagerness": "moderate"}],
-    }
+POSTS, WRITING = Path("posts"), Path("writing")
+INDEX, PAGES = Path("index.html"), [Path("index.html"), Path("internet.html")]
+CSS = Path("stylesheets/styles.css").read_text()
+SPECULATION_RULES = (
+    '{"prerender": [{"where": {"href_matches": "/*"}, "eagerness": "moderate"}],'
+    ' "prefetch": [{"where": {"not": {"href_matches": "/*"}}, "eagerness": "moderate"}]}'
 )
 
-_CODE_RE = re.compile(r"```.*?```|`[^`]*`", re.DOTALL)
-_MARKDOWN_SYNTAX_RE = re.compile(
-    r"!?\[[^\]]*\]\([^)]*\)|^#{1,6}\s+|[*_~`>|]|\d+\.\s|[-*+]\s", re.MULTILINE
-)
-_FOOTNOTE_REF_RE = re.compile(r"\[(\d+)\]")
 
-TEMPLATE = """<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+REF = re.compile(r"\s*\[(\d+)\]")
+
+
+def footnotes(soup: BeautifulSoup) -> None:
+    heading = soup.find("h2", string="Footnotes")
+    if not heading:
+        return
+
+    ol = soup.new_tag("ol")
+    heading.insert_after(ol)
+    for p in heading.find_next_siblings("p"):
+        first = p.find(string=REF)
+        n = REF.match(first)[1]
+        first.replace_with(REF.sub("", first, 1).lstrip())
+        p.name, p["id"], p["value"] = "li", f"footnote-{n}", n
+        ol.append(p)
+
+    for text in soup.find_all(string=REF):
+        if text.find_parent(["pre", "code"]) or ol in text.parents:
+            continue
+        html = REF.sub(r'<sup><a href="#footnote-\1">\1</a></sup>', text)
+        text.replace_with(*BeautifulSoup(html, "html.parser").contents)
+
+
+def typeset(html: str) -> dict[str, str]:
+    js = """
+    require("mathjax").init({
+      loader: { load: ["input/tex", "output/svg"] },
+      tex: { inlineMath: [["$", "$"]] },
+      svg: { fontCache: "global" },
+      startup: { document: require("fs").readFileSync(0, "utf8") },
+    }).then(({ startup: { adaptor, document }, svgStylesheet }) => {
+      const body = adaptor.body(document.document);
+      const hasMath = [...document.math].length > 0;
+      if (!hasMath) adaptor.remove(adaptor.elementById(body, "MJX-SVG-global-cache"));
+      process.stdout.write(JSON.stringify({
+        style: hasMath ? `<style>${adaptor.textContent(svgStylesheet())}</style>` : "",
+        body: adaptor.innerHTML(body),
+      }));
+    });
+    """
+    return json.loads(
+        subprocess.check_output(["node", "-e", js], input=html, text=True)
+    )
+
+
+def render(md: str) -> tuple[str, str, datetime, int]:
+    soup = BeautifulSoup(
+        markdown.markdown(md, extensions=["fenced_code", "toc"]), "html.parser"
+    )
+    title = soup.h1.text
+    date = datetime.strptime(soup.blockquote.text.strip(), "%B %d, %Y")
+    soup.h1.name = "h2"
+    footnotes(soup)
+
+    page = """<!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>{css}</style>
     {style}
     <script type="speculationrules">{rules}</script>
     <title>Ayush Gundawar</title>
-  </head>
-  <body>
-    {body}
-  </body>
-</html>
-"""
+    </head>
+    <body>{body}</body>
+    </html>
+    """.format(css=CSS, rules=SPECULATION_RULES, **typeset(str(soup)))
+    html = minify_html.minify(page, minify_css=True)
 
-
-def slugify(title: str) -> str:
-    """'Parallel Programming Models' -> 'parallel-programming-models'."""
-    return re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
-
-
-def reading_time(md: str) -> int:
-    """Estimate reading time in minutes (≈ 200 wpm)."""
-    words = _MARKDOWN_SYNTAX_RE.sub(" ", _CODE_RE.sub("", md)).split()
-    return max(1, round(len(words) / 200))
-
-
-def _add_footnotes(soup: BeautifulSoup) -> None:
-    """Turn inline [N] refs into superscript links and number the Footnotes entries."""
-    ol = soup.new_tag("ol")
-    heading = soup.find("h2", string="Footnotes")
-    for p in heading.find_next_siblings() if heading else ():
-        if p.name.startswith("h"):
-            break
-        m = p.name == "p" and _FOOTNOTE_REF_RE.match(p.get_text(strip=True))
-        if not m:
-            continue
-        li = soup.new_tag("li", id=f"footnote-{m[1]}")
-        if int(m[1]) != len(ol.contents) + 1:
-            li["value"] = m[1]
-        first = p.find(string=_FOOTNOTE_REF_RE)
-        first.replace_with(_FOOTNOTE_REF_RE.sub("", first, count=1).lstrip())
-        li.extend(p)
-        p.decompose()
-        ol.append(li)
-    if ol.contents:
-        heading.insert_after(ol)
-
-    for text in soup.find_all(string=_FOOTNOTE_REF_RE):
-        if any(t is ol or t.name in ("pre", "code") for t in text.parents):
-            continue
-        parts = _FOOTNOTE_REF_RE.split(text)
-        out = []
-        for i, part in enumerate(parts):
-            if i % 2:
-                sup = soup.new_tag("sup")
-                sup.append(soup.new_tag("a", href=f"#footnote-{part}"))
-                sup.a.string = part
-                out.append(sup)
-            else:
-                if i + 1 < len(parts):
-                    part = part.rstrip()
-                if part:
-                    out.append(part)
-        text.replace_with(*out)
-
-
-def render_post(md: str) -> str:
-    soup = BeautifulSoup(
-        markdown.markdown(md, extensions=["fenced_code", "toc"]), "html.parser"
-    )
-    _add_footnotes(soup)
-    # Typeset math at build time so the page never reflows while MathJax loads.
-    typeset = subprocess.check_output(["node", "render_math.js"], input=str(soup), text=True)
-    html = TEMPLATE.format(css=CSS, rules=SPECULATION_RULES, **json.loads(typeset))
-    return minify_html.minify(html, minify_css=True)
+    for pre in soup("pre"):
+        pre.decompose()
+    minutes = max(1, round(len(soup.text.split()) / 200))
+    return html, title, date, minutes
 
 
 def main() -> None:
-    shutil.rmtree(WRITING_DIR, ignore_errors=True)
-    WRITING_DIR.mkdir()
-
+    shutil.rmtree(WRITING, ignore_errors=True)
+    WRITING.mkdir()
     posts = []
-    for md_path in sorted(Path("posts").glob("*.md")):
-        md = md_path.read_text(encoding="utf-8")
-        title, _, date = md.splitlines()[:3]
-        title = title.lstrip("# ").strip()
-        date = datetime.strptime(date.lstrip("> ").strip(), "%B %d, %Y")
-        slug = slugify(title)
-        (WRITING_DIR / f"{slug}.html").write_text(render_post(md), encoding="utf-8")
-        posts.append((date, title, slug, reading_time(md)))
+    for path in POSTS.glob("*.md"):
+        html, title, date, minutes = render(path.read_text())
+        slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+        (WRITING / f"{slug}.html").write_text(html)
+        posts.append((date, title, slug, minutes))
 
-    pages = {p: BeautifulSoup(p.read_text(encoding="utf-8"), "html.parser") for p in PAGES}
+    pages = {p: BeautifulSoup(p.read_text(), "html.parser") for p in PAGES}
     for soup in pages.values():
         soup.find("style", id="css").string = CSS
         soup.find("script", type="speculationrules").string = SPECULATION_RULES
@@ -127,7 +112,7 @@ def main() -> None:
     index = pages[INDEX]
     links = index.find(id="post-links")
     links.clear()
-    for date, title, slug, minutes in sorted(posts, key=lambda p: p[0], reverse=True):
+    for date, title, slug, minutes in sorted(posts, reverse=True):
         li = index.new_tag("li")
         li.append(index.new_tag("a", href=f"/writing/{slug}"))
         li.a.string = title
@@ -135,7 +120,7 @@ def main() -> None:
         links.append(li)
 
     for path, soup in pages.items():
-        path.write_text(str(soup), encoding="utf-8")
+        path.write_text(str(soup))
     subprocess.run(["prettier", "--write", *PAGES])
 
 

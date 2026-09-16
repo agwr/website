@@ -11,13 +11,17 @@
       }
 
       body {
-        margin: 1.5rem;
-        max-width: 36rem;
+        margin: 1.5rem auto;
+        max-width: min(36rem, 100% - 3rem);
         overflow-wrap: break-word;
       }
 
       blockquote {
         margin-left: 0;
+      }
+
+      li + li {
+        margin-top: 0.3em;
       }
 
       pre,
@@ -50,7 +54,7 @@
     </script>
   </head>
   <body>
-    <h1>Ayush Gundawar</h1>
+    <h2>Ayush Gundawar</h2>
     <p>
       I work on scaling neural networks. Prior, I worked on high-frequency
       trading and autonomous humanoid robotics.
@@ -66,7 +70,7 @@
       reach me is <a href="mailto:gundawar@gatech.edu">email</a> or carrier
       pigeon.
     </p>
-    <h3>Essays</h3>
+    <h3>Writing</h3>
     <ul id="post-links">
       <li>
         <a href="/writing/our-stolen-light">Our Stolen Light</a> (2026, 1 min)
@@ -75,7 +79,7 @@
         <a href="/writing/parallel-programming-models"
           >Parallel Programming Models</a
         >
-        (2024, 13 min)
+        (2024, 14 min)
       </li>
     </ul>
   </body>
