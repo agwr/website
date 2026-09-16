@@ -99,7 +99,6 @@ def render_post(md: str) -> str:
         markdown.markdown(md, extensions=["fenced_code", "toc"]), "html.parser"
     )
     _add_footnotes(soup)
-    soup.h1.insert_after(soup.new_tag("hr"))
     # Typeset math at build time so the page never reflows while MathJax loads.
     typeset = subprocess.check_output(["node", "render_math.js"], input=str(soup), text=True)
     html = TEMPLATE.format(css=CSS, rules=SPECULATION_RULES, **json.loads(typeset))
