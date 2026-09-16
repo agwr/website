@@ -9,10 +9,13 @@ require("mathjax")
   .then(({ startup: { adaptor, document }, svgStylesheet }) => {
     const body = adaptor.body(document.document);
     const hasMath = [...document.math].length > 0;
-    if (!hasMath) adaptor.remove(adaptor.elementById(body, "MJX-SVG-global-cache"));
+    if (!hasMath)
+      adaptor.remove(adaptor.elementById(body, "MJX-SVG-global-cache"));
     process.stdout.write(
       JSON.stringify({
-        style: hasMath ? `<style>${adaptor.textContent(svgStylesheet())}</style>` : "",
+        style: hasMath
+          ? `<style>${adaptor.textContent(svgStylesheet())}</style>`
+          : "",
         body: adaptor.innerHTML(body),
       }),
     );
