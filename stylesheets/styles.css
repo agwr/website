@@ -14,7 +14,7 @@ blockquote {
   margin-left: 0;
 }
 
-li+li {
+li + li {
   margin-top: 0.3em;
 }
 
