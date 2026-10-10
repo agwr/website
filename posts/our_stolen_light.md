@@ -2,7 +2,7 @@
 
 > February 7, 2026
 
-Prometheus did not steal fire because he despised the gods. He stole it because he could not bear seeing us shiver in the dark. The punishment of eternal torture wasn't for the theft. It was for knowing. Knowing that once you give humanity flame, they won't cease at warmth. They'll forge weapons. They'll burn forests. They'll build engines that shake the foundations of Olympus itself.
+Prometheus did not steal fire because he despised the gods. He stole it because he could not bear seeing us shiver in the dark. TThe punishment of eternal torture came from knowing. Knowing that once you give humanity flame, they won't cease at warmth. They'll forge weapons. They'll burn forests. They'll build engines that shake the foundations of Olympus itself.
 
 We pretend the choice was ever ours to make. We speak of accelerating technology as if somewhere in history's boundless machinery there exists a brake pedal we've collectively decided not to press. But stand in any emergency room at 3 AM and watch the defibrillator's arc restore a mother's pulse. The doctor doesn't pause. They can't. The flame is already burning in their hands.
 
