@@ -4,17 +4,109 @@
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link href="data:," rel="icon" />
     <style id="css">
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+      }
+
       html {
         -webkit-text-size-adjust: 100%;
         text-size-adjust: 100%;
       }
 
       body {
-        margin: 1.5rem auto;
-        max-width: min(38rem, 100% - 3rem);
-        line-height: 1.3;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 15px;
+        background: #fff;
+        color: #000;
         overflow-wrap: break-word;
+      }
+
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: underline;
+        text-decoration-color: #999;
+        text-underline-offset: 2px;
+      }
+
+      a:hover {
+        text-decoration-color: #000;
+      }
+
+      .page {
+        min-height: 100vh;
+        display: flex;
+        padding: 48px 24px 32px 48px;
+      }
+
+      .container {
+        width: 500px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        flex-shrink: 0;
+      }
+
+      .name {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        margin: 0;
+      }
+
+      .bio {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .bio p {
+        line-height: 1.4;
+        margin: 0;
+      }
+
+      .links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      .footer {
+        letter-spacing: 0.01em;
+      }
+
+      .post {
+        max-width: 572px;
+        padding: 48px 24px 32px 48px;
+        line-height: 1.4;
+      }
+
+      .post > :first-child {
+        margin-top: 0;
+      }
+
+      .post h2 {
+        font-size: 18px;
+        letter-spacing: -0.01em;
+      }
+
+      .post h3 {
+        font-size: 15px;
       }
 
       blockquote {
@@ -26,17 +118,50 @@
       }
 
       pre,
+      code {
+        font-size: 13px;
+      }
+
+      pre {
+        line-height: 1.4;
+      }
+
+      pre,
       mjx-container {
         overflow-x: auto;
       }
 
-      img {
-        max-width: 100%;
-        height: auto;
-      }
+      @media (max-width: 640px) {
+        body {
+          font-size: 17px;
+        }
 
-      a:visited {
-        color: LinkText;
+        .page {
+          padding: 28px 20px 24px;
+        }
+
+        .container {
+          width: 100%;
+          flex-shrink: 1;
+          padding: 16px 0;
+        }
+
+        .name {
+          font-size: 20px;
+        }
+
+        .bio p,
+        .post {
+          line-height: 1.5;
+        }
+
+        .links {
+          gap: 14px;
+        }
+
+        .post {
+          padding: 28px 20px 24px;
+        }
       }
     </style>
     <title>Ayush Gundawar</title>
@@ -55,201 +180,211 @@
     </script>
   </head>
   <body>
-    <h2>Internet Essays</h2>
-    <h3>Thinking</h3>
-    <ul>
-      <li>
-        <em>Nabeel Qureshi.</em>
-        <a href="https://nabeelqu.co/understanding">Understanding</a>
-      </li>
-      <li>
-        <em>Nabeel Qureshi.</em>
-        <a href="https://nabeelqu.co/puzzles">Puzzles</a>
-      </li>
-      <li>
-        <em>Paul Graham.</em>
-        <a href="https://paulgraham.com/think.html"
-          >How to Think for Yourself</a
-        >
-      </li>
-      <li>
-        <em>Scott Alexander.</em>
-        <a
-          href="https://www.astralcodexten.com/p/heuristics-that-almost-always-work"
-          >Heuristics That Almost Always Work</a
-        >
-      </li>
-      <li>
-        <em>Scott Alexander.</em>
-        <a href="https://www.astralcodexten.com/p/contra-everyone-on-taste"
-          >Contra Everyone On Taste</a
-        >
-      </li>
-      <li>
-        <em>Scott Alexander.</em>
-        <a href="https://slatestarcodex.com/2013/07/17/who-by-very-slow-decay/"
-          >Who By Very Slow Decay</a
-        >
-      </li>
-      <li>
-        <em>Scott Alexander.</em>
-        <a
-          href="https://slatestarcodex.com/2014/12/19/nobody-is-perfect-everything-is-commensurable/"
-          >Nobody Is Perfect, Everything Is Commensurable</a
-        >
-      </li>
-      <li>
-        <em>Ben Kuhn.</em>
-        <a href="https://www.benkuhn.net/abyss/"
-          >Staring into the Abyss as a Core Life Skill</a
-        >
-      </li>
-    </ul>
-    <h3>Writing</h3>
-    <ul>
-      <li>
-        <em>Paul Graham.</em>
-        <a href="https://paulgraham.com/goodwriting.html">Good Writing</a>
-      </li>
-      <li>
-        <em>Dan Luu.</em>
-        <a href="https://danluu.com/writing-non-advice/"
-          >Some Thoughts on Writing</a
-        >
-      </li>
-    </ul>
-    <h3>Career</h3>
-    <ul>
-      <li>
-        <em>Paul Graham.</em>
-        <a href="https://paulgraham.com/greatwork.html">How to Do Great Work</a>
-      </li>
-      <li>
-        <em>Paul Graham.</em>
-        <a href="https://paulgraham.com/superlinear.html"
-          >Superlinear Returns</a
-        >
-      </li>
-      <li>
-        <em>Paul Graham.</em>
-        <a href="https://paulgraham.com/getideas.html">How to Get New Ideas</a>
-      </li>
-      <li>
-        <em>Ben Kuhn.</em>
-        <a href="https://www.benkuhn.net/outliers/">Searching for Outliers</a>
-      </li>
-      <li>
-        <em>Ben Kuhn.</em>
-        <a href="https://www.benkuhn.net/hard/"
-          >You Don't Need to Work on Hard Problems</a
-        >
-      </li>
-      <li>
-        <em>Ben Kuhn.</em>
-        <a href="https://www.benkuhn.net/pjm/">How I've Run Major Projects</a>
-      </li>
-      <li>
-        <em>Alexey Guzey.</em>
-        <a href="https://guzey.com/impact/">On Impact</a>
-      </li>
-      <li>
-        <em>Alexey Guzey.</em>
-        <a href="https://guzey.com/talent/">Omens of Exceptional Talent</a>
-      </li>
-      <li>
-        <em>Surya Midha</em>
-        <a href="https://musings.suryamidha.com/the-virtues-of-looking-stupid/"
-          >The Virtues of Looking Stupid</a
-        >
-      </li>
-    </ul>
-    <h3>Intelligence Race</h3>
-    <ul>
-      <li>
-        <em>Gwern.</em>
-        <a href="https://gwern.net/scaling-hypothesis"
-          >The Scaling Hypothesis</a
-        >
-      </li>
-      <li>
-        <em>Eric Jang.</em>
-        <a href="https://evjang.com/2024/03/03/all-roads-robots.html"
-          >All Roads Lead to Robotics</a
-        >
-      </li>
-      <li>
-        <em>Shunyu Yao.</em>
-        <a href="https://ysymyth.github.io/The-Second-Half/">The Second Half</a>
-      </li>
-      <li>
-        <em>Alexey Guzey.</em>
-        <a href="https://guzey.com/why-i-believe-in-agi-again/"
-          >Why I Believe in AGI (Again)</a
-        >
-      </li>
-      <li>
-        <em>Citadel Securities.</em>
-        <a
-          href="https://www.citadelsecurities.com/news-and-insights/global-macro-strategy/ai-merican-exceptionalism/"
-          >AI-merican Exceptionalism</a
-        >
-      </li>
-      <li>
-        <em>Citadel Securities.</em>
-        <a
-          href="https://www.citadelsecurities.com/news-and-insights/macro-thoughts/the-frontier-is-not-for-everyone/"
-          >The Frontier Is Not for Everyone</a
-        >
-      </li>
-    </ul>
-    <h3>Machine Learning</h3>
-    <ul>
-      <li>
-        <em>Gwern.</em>
-        <a href="https://gwern.net/backstop"
-          >Evolution as Backstop for Reinforcement Learning</a
-        >
-      </li>
-      <li>
-        <em>Eric Jang.</em>
-        <a href="https://evjang.com/2021/10/23/generalization.html"
-          >Just Ask for Generalization</a
-        >
-      </li>
-      <li>
-        <em>Eric Jang.</em>
-        <a href="https://blog.evjang.com/2018/12/uncertainty.html"
-          >Uncertainty: A Tutorial</a
-        >
-      </li>
-      <li>
-        <em>Horace He.</em>
-        <a href="https://horace.io/brrr_intro.html"
-          >Making Deep Learning Go Brrrr From First Principles</a
-        >
-      </li>
-      <li>
-        <em>Hazy Research.</em>
-        <a href="https://hazyresearch.stanford.edu/blog/2024-05-12-tk"
-          >GPUs Go Brrr</a
-        >
-      </li>
-      <li>
-        <em>Dario Amodei et al.</em>
-        <a href="https://arxiv.org/abs/1606.06565"
-          >Concrete Problems in AI Safety</a
-        >
-      </li>
-    </ul>
-    <h3>Miscellaneous</h3>
-    <ul>
-      <li>
-        <em>Headlands Tech.</em>
-        <a
-          href="https://blog.headlandstech.com/2024/05/01/opinion-rationalizing-latency-competition-in-high-frequency-trading/"
-          >Rationalizing Latency Competition in HFT</a
-        >
-      </li>
-    </ul>
+    <main class="post">
+      <h2>Internet Essays</h2>
+      <h3>Thinking</h3>
+      <ul>
+        <li>
+          <em>Nabeel Qureshi.</em>
+          <a href="https://nabeelqu.co/understanding">Understanding</a>
+        </li>
+        <li>
+          <em>Nabeel Qureshi.</em>
+          <a href="https://nabeelqu.co/puzzles">Puzzles</a>
+        </li>
+        <li>
+          <em>Paul Graham.</em>
+          <a href="https://paulgraham.com/think.html"
+            >How to Think for Yourself</a
+          >
+        </li>
+        <li>
+          <em>Scott Alexander.</em>
+          <a
+            href="https://www.astralcodexten.com/p/heuristics-that-almost-always-work"
+            >Heuristics That Almost Always Work</a
+          >
+        </li>
+        <li>
+          <em>Scott Alexander.</em>
+          <a href="https://www.astralcodexten.com/p/contra-everyone-on-taste"
+            >Contra Everyone On Taste</a
+          >
+        </li>
+        <li>
+          <em>Scott Alexander.</em>
+          <a
+            href="https://slatestarcodex.com/2013/07/17/who-by-very-slow-decay/"
+            >Who By Very Slow Decay</a
+          >
+        </li>
+        <li>
+          <em>Scott Alexander.</em>
+          <a
+            href="https://slatestarcodex.com/2014/12/19/nobody-is-perfect-everything-is-commensurable/"
+            >Nobody Is Perfect, Everything Is Commensurable</a
+          >
+        </li>
+        <li>
+          <em>Ben Kuhn.</em>
+          <a href="https://www.benkuhn.net/abyss/"
+            >Staring into the Abyss as a Core Life Skill</a
+          >
+        </li>
+      </ul>
+      <h3>Writing</h3>
+      <ul>
+        <li>
+          <em>Paul Graham.</em>
+          <a href="https://paulgraham.com/goodwriting.html">Good Writing</a>
+        </li>
+        <li>
+          <em>Dan Luu.</em>
+          <a href="https://danluu.com/writing-non-advice/"
+            >Some Thoughts on Writing</a
+          >
+        </li>
+      </ul>
+      <h3>Career</h3>
+      <ul>
+        <li>
+          <em>Paul Graham.</em>
+          <a href="https://paulgraham.com/greatwork.html"
+            >How to Do Great Work</a
+          >
+        </li>
+        <li>
+          <em>Paul Graham.</em>
+          <a href="https://paulgraham.com/superlinear.html"
+            >Superlinear Returns</a
+          >
+        </li>
+        <li>
+          <em>Paul Graham.</em>
+          <a href="https://paulgraham.com/getideas.html"
+            >How to Get New Ideas</a
+          >
+        </li>
+        <li>
+          <em>Ben Kuhn.</em>
+          <a href="https://www.benkuhn.net/outliers/">Searching for Outliers</a>
+        </li>
+        <li>
+          <em>Ben Kuhn.</em>
+          <a href="https://www.benkuhn.net/hard/"
+            >You Don't Need to Work on Hard Problems</a
+          >
+        </li>
+        <li>
+          <em>Ben Kuhn.</em>
+          <a href="https://www.benkuhn.net/pjm/">How I've Run Major Projects</a>
+        </li>
+        <li>
+          <em>Alexey Guzey.</em>
+          <a href="https://guzey.com/impact/">On Impact</a>
+        </li>
+        <li>
+          <em>Alexey Guzey.</em>
+          <a href="https://guzey.com/talent/">Omens of Exceptional Talent</a>
+        </li>
+        <li>
+          <em>Surya Midha</em>
+          <a
+            href="https://musings.suryamidha.com/the-virtues-of-looking-stupid/"
+            >The Virtues of Looking Stupid</a
+          >
+        </li>
+      </ul>
+      <h3>Intelligence Race</h3>
+      <ul>
+        <li>
+          <em>Gwern.</em>
+          <a href="https://gwern.net/scaling-hypothesis"
+            >The Scaling Hypothesis</a
+          >
+        </li>
+        <li>
+          <em>Eric Jang.</em>
+          <a href="https://evjang.com/2024/03/03/all-roads-robots.html"
+            >All Roads Lead to Robotics</a
+          >
+        </li>
+        <li>
+          <em>Shunyu Yao.</em>
+          <a href="https://ysymyth.github.io/The-Second-Half/"
+            >The Second Half</a
+          >
+        </li>
+        <li>
+          <em>Alexey Guzey.</em>
+          <a href="https://guzey.com/why-i-believe-in-agi-again/"
+            >Why I Believe in AGI (Again)</a
+          >
+        </li>
+        <li>
+          <em>Citadel Securities.</em>
+          <a
+            href="https://www.citadelsecurities.com/news-and-insights/global-macro-strategy/ai-merican-exceptionalism/"
+            >AI-merican Exceptionalism</a
+          >
+        </li>
+        <li>
+          <em>Citadel Securities.</em>
+          <a
+            href="https://www.citadelsecurities.com/news-and-insights/macro-thoughts/the-frontier-is-not-for-everyone/"
+            >The Frontier Is Not for Everyone</a
+          >
+        </li>
+      </ul>
+      <h3>Machine Learning</h3>
+      <ul>
+        <li>
+          <em>Gwern.</em>
+          <a href="https://gwern.net/backstop"
+            >Evolution as Backstop for Reinforcement Learning</a
+          >
+        </li>
+        <li>
+          <em>Eric Jang.</em>
+          <a href="https://evjang.com/2021/10/23/generalization.html"
+            >Just Ask for Generalization</a
+          >
+        </li>
+        <li>
+          <em>Eric Jang.</em>
+          <a href="https://blog.evjang.com/2018/12/uncertainty.html"
+            >Uncertainty: A Tutorial</a
+          >
+        </li>
+        <li>
+          <em>Horace He.</em>
+          <a href="https://horace.io/brrr_intro.html"
+            >Making Deep Learning Go Brrrr From First Principles</a
+          >
+        </li>
+        <li>
+          <em>Hazy Research.</em>
+          <a href="https://hazyresearch.stanford.edu/blog/2024-05-12-tk"
+            >GPUs Go Brrr</a
+          >
+        </li>
+        <li>
+          <em>Dario Amodei et al.</em>
+          <a href="https://arxiv.org/abs/1606.06565"
+            >Concrete Problems in AI Safety</a
+          >
+        </li>
+      </ul>
+      <h3>Miscellaneous</h3>
+      <ul>
+        <li>
+          <em>Headlands Tech.</em>
+          <a
+            href="https://blog.headlandstech.com/2024/05/01/opinion-rationalizing-latency-competition-in-high-frequency-trading/"
+            >Rationalizing Latency Competition in HFT</a
+          >
+        </li>
+      </ul>
+    </main>
   </body>
 </html>
