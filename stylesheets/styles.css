@@ -89,6 +89,12 @@ a:hover {
 }
 
 .post > :first-child {
+  margin: 0 0 16px;
+  line-height: normal;
+}
+
+.post > :first-child + *,
+.post > :first-child + * > :first-child {
   margin-top: 0;
 }
 
@@ -138,7 +144,8 @@ mjx-container {
     padding: 16px 0;
   }
 
-  .name {
+  .name,
+  .post h2 {
     font-size: 20px;
   }
 
@@ -152,6 +159,6 @@ mjx-container {
   }
 
   .post {
-    padding: 28px 20px 24px;
+    padding: 44px 20px 40px;
   }
 }
