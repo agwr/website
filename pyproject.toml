@@ -1,8 +1,9 @@
 [project]
 name = "website"
 version = "0.1.0"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
+    "apache-hamilton>=1.90.0",
     "beautifulsoup4>=4.12.3",
     "markdown>=3.7",
     "minify-html>=0.18.1",
