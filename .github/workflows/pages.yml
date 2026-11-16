@@ -13,14 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v7
-      - run: npm install --global prettier@3
       - run: npm install
       - run: uv run compile.py
 
       - if: github.ref_name == github.event.repository.default_branch
         uses: actions/configure-pages@v5
-      - if: github.ref_name == github.event.repository.default_branch
-        run: mkdir _site && cp -r CNAME index.html internet.html writing _site
       - if: github.ref_name == github.event.repository.default_branch
         uses: actions/upload-pages-artifact@v4
         with:

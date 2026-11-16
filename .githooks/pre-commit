@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+
+files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.html' '*.css')
+[ -z "$files" ] && exit 0
+
+echo "$files" | xargs prettier --write --log-level warn
+echo "$files" | xargs git add

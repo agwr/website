@@ -8,9 +8,11 @@ import markdown
 import minify_html
 from bs4 import BeautifulSoup
 
-POSTS, WRITING = Path("posts"), Path("writing")
+POSTS, SITE = Path("posts"), Path("_site")
 PAGES = [Path("index.html"), Path("internet.html")]
+STATIC = [Path("CNAME")]
 CSS = Path("stylesheets/styles.css").read_text()
+STYLESHEET_LINK = re.compile(r'<link rel="stylesheet" href="/stylesheets/styles.css"\s*/?>')
 SPECULATION_RULES = (
     '{"prerender": [{"where": {"href_matches": "/*"}, "eagerness": "moderate"}],'
     ' "prefetch": [{"where": {"not": {"href_matches": "/*"}}, "eagerness": "moderate"}]}'
@@ -77,31 +79,45 @@ def render(md: str) -> tuple[str, str]:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="data:,">
-    <style>{css}</style>
+    <link rel="stylesheet" href="/stylesheets/styles.css">
     {style}
-    <script type="speculationrules">{rules}</script>
     <title>Ayush Gundawar</title>
     </head>
     <body><main class="post">{body}</main></body>
     </html>
-    """.format(css=CSS, rules=SPECULATION_RULES, **typeset(str(soup)))
-    return minify_html.minify(page, minify_css=True), title
+    """.format(**typeset(str(soup)))
+    return page, title
+
+
+def substitute_once(pattern: str | re.Pattern, replacement: str, html: str) -> str:
+    html, count = re.subn(pattern, lambda _: replacement, html)
+    if count != 1:
+        raise ValueError(f"expected exactly one match for {pattern!r}, found {count}")
+    return html
+
+
+def finalize(html: str) -> str:
+    html = substitute_once(STYLESHEET_LINK, f"<style>{CSS}</style>", html)
+    html = substitute_once(
+        "</head>",
+        f'<script type="speculationrules">{SPECULATION_RULES}</script></head>',
+        html,
+    )
+    return minify_html.minify(html, minify_css=True)
 
 
 def main() -> None:
-    shutil.rmtree(WRITING, ignore_errors=True)
-    WRITING.mkdir()
+    shutil.rmtree(SITE, ignore_errors=True)
+    (SITE / "writing").mkdir(parents=True)
     for path in POSTS.glob("*.md"):
         html, title = render(path.read_text())
         slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
-        (WRITING / f"{slug}.html").write_text(html)
+        (SITE / "writing" / f"{slug}.html").write_text(finalize(html))
 
     for path in PAGES:
-        soup = BeautifulSoup(path.read_text(), "html.parser")
-        soup.find("style", id="css").string = CSS
-        soup.find("script", type="speculationrules").string = SPECULATION_RULES
-        path.write_text(str(soup))
-    subprocess.run(["prettier", "--write", *PAGES])
+        (SITE / path).write_text(finalize(path.read_text()))
+    for path in STATIC:
+        shutil.copy(path, SITE / path)
 
 
 if __name__ == "__main__":
